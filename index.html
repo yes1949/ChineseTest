@@ -85,6 +85,7 @@
             width: 100%;
             padding: 16px;
             overflow: hidden;
+            position: relative;
         }
 
         .page.active {
@@ -263,7 +264,6 @@
         .btn-success { background-color: #43a047; color: white; }
         .btn-warning { background-color: #ff9800; color: white; }
 
-        /* 大尺寸全宽按钮 */
         .btn-large {
             height: 52px;
             font-size: 1.1rem;
@@ -277,6 +277,7 @@
             flex-direction: column;
             height: 100%;
             gap: 12px;
+            position: relative;
         }
 
         .content-display {
@@ -293,6 +294,14 @@
             position: relative;
         }
 
+        .wrong-mode-banner {
+            color: #e53935;
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+            display: none;
+        }
+
         .chapter-tag {
             font-size: 0.85rem;
             color: #827717;
@@ -303,10 +312,11 @@
             font-weight: bold;
         }
 
+        /* 单字卡片样式 */
         .single-char-card {
             font-size: clamp(64px, 16vw, 100px);
             font-weight: bold;
-            color: #1a237e;
+            color: #1a237e; /* 默认深蓝色 */
             background: #ffffff;
             width: clamp(110px, 28vw, 160px);
             height: clamp(110px, 28vw, 160px);
@@ -318,9 +328,15 @@
             border: 2px solid #c5cae9;
             margin: 6px 0;
             user-select: none;
+            transition: color 0.2s, border-color 0.2s;
         }
 
-        /* 出处遮罩控制区 */
+        /* 错题模式下，单字卡片字体变红 */
+        .single-char-card.is-wrong-mode {
+            color: #e53935;
+            border-color: #ef9a9a;
+        }
+
         .context-mask-area {
             width: 100%;
             max-width: 95%;
@@ -381,6 +397,60 @@
         .stat-correct { color: #43a047; }
         .stat-wrong { color: #e53935; }
         .stat-total { color: #757575; }
+
+        /* 结算弹窗 */
+        .result-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 20px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .result-card-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .result-card.success .result-card-title { color: #2e7d32; }
+        .result-card.has-wrong .result-card-title { color: #c62828; }
+
+        .result-card-msg {
+            font-size: 1rem;
+            color: #424242;
+            line-height: 1.5;
+        }
+
+        .result-btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
 
         /* 第三页：统计页样式 */
         .stats-container {
@@ -555,7 +625,6 @@
             <div class="page-title">抽卡认字 - 内容选择</div>
             
             <div class="select-container">
-                <!-- 艾宾浩斯复习卡片 -->
                 <div class="ebbinghaus-card">
                     <div class="ebbinghaus-title">
                         <span>艾宾浩斯错字复习</span>
@@ -565,7 +634,6 @@
                     <button class="btn btn-warning" onclick="startEbbinghausPractice()" style="margin-top: 6px;">开始艾宾浩斯复习</button>
                 </div>
 
-                <!-- 书名选择结构 -->
                 <div id="tree-container" class="tree-container">
                     <div style="text-align: center; color: #666; margin-top: 10px;">正在加载《论语》...</div>
                 </div>
@@ -581,10 +649,10 @@
         <div id="page-practice" class="page">
             <div class="practice-container">
                 <div class="content-display">
+                    <div id="wrong-mode-banner" class="wrong-mode-banner">错题练习 1/1</div>
                     <div id="display-chapter" class="chapter-tag">章节名称</div>
                     <div id="display-char-card" class="single-char-card">字</div>
                     
-                    <!-- 出处遮罩区 -->
                     <div class="context-mask-area" onclick="toggleContextMask()">
                         <div id="context-tip" class="context-mask-tip">点击查看出处</div>
                         <div id="display-context" class="context-text"></div>
@@ -602,12 +670,24 @@
                         <div>剩余卡片: <span id="stat-remaining" class="stat-total">0</span></div>
                     </div>
 
-                    <!-- 放大加高按钮行 -->
                     <div class="action-row" style="display:flex; gap:16px;">
                         <button class="btn btn-success btn-large" onclick="recordAnswer(true)">认识 (✓)</button>
                         <button class="btn btn-danger btn-large" onclick="recordAnswer(false)">不认识 (✕)</button>
                     </div>
                 </div>
+
+                <!-- 结算卡片弹窗 -->
+                <div id="result-overlay" class="result-overlay">
+                    <div id="result-card" class="result-card">
+                        <div id="result-title" class="result-card-title">练习完成</div>
+                        <div id="result-msg" class="result-card-msg"></div>
+                        <div class="result-btn-group">
+                            <button class="btn btn-primary" onclick="retryLastPractice()">再练一次</button>
+                            <button class="btn btn-secondary" onclick="goToContentSelect()">选择内容</button>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -654,11 +734,15 @@
 
     <script>
         let parsedData = { book: "论语", chapters: [] };
-        let charCardsQueue = [];
+        let initialCardsQueue = []; 
+        let charCardsQueue = [];    
         let currentIndex = 0;
         let stats = { correct: 0, wrong: 0 };
         let currentSessionDetails = {};
         let isContextRevealed = false;
+
+        let isWrongMode = false;
+        let wrongTotalCount = 0;
 
         let showAllHistoryDates = false;
         let showAllWrongDates = false;
@@ -718,7 +802,6 @@
             });
         }
 
-        // 只显示书名，默认收起
         function renderSelectionTree() {
             const container = document.getElementById('tree-container');
             container.innerHTML = '';
@@ -730,7 +813,7 @@
             bookHeader.innerHTML = `<span class="toggle-icon" id="book-icon">▶</span><span>《${parsedData.book}》</span>`;
             
             const chapterList = document.createElement('div');
-            chapterList.className = 'collapsed'; // 默认收起
+            chapterList.className = 'collapsed';
 
             bookHeader.onclick = () => {
                 const isCollapsed = chapterList.classList.toggle('collapsed');
@@ -817,13 +900,12 @@
             document.querySelectorAll('#tree-container input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
-        /* --------------- 艾宾浩斯记忆曲线算法 --------------- */
         function getEbbinghausWrongChars() {
             const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
             const todayStr = getTodayDateStr();
             const todayDate = new Date(todayStr);
 
-            const intervals = [1, 2, 4, 7, 15, 30]; // 艾宾浩斯复习天数节点
+            const intervals = [1, 2, 4, 7, 15, 30]; 
             let targetCharSet = new Set();
 
             for (let dateStr in historyData) {
@@ -831,7 +913,6 @@
                 const diffTime = Math.abs(todayDate - recordDate);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                // 判断是否落在 1, 2, 4, 7, 15, 30 天的复习节点上
                 if (intervals.includes(diffDays)) {
                     for (let char in historyData[dateStr]) {
                         if (historyData[dateStr][char].wrong > 0) {
@@ -856,16 +937,15 @@
                 return;
             }
 
-            charCardsQueue = [];
+            let cards = [];
             const chineseCharRegex = /[\u4e00-\u9fa5]/;
 
-            // 在论语全文中匹配这些错字的上下文出处
             parsedData.chapters.forEach(chap => {
                 chap.paragraphs.forEach(text => {
                     for (let i = 0; i < text.length; i++) {
                         const c = text[i];
                         if (wrongChars.includes(c) && chineseCharRegex.test(c)) {
-                            charCardsQueue.push({
+                            cards.push({
                                 char: c,
                                 chapterTitle: chap.title,
                                 fullText: text,
@@ -876,11 +956,11 @@
                 });
             });
 
-            startQueuePractice();
+            startQueuePractice(cards, false);
         }
 
         function startPractice() {
-            charCardsQueue = [];
+            let cards = [];
             const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
             const chineseCharRegex = /[\u4e00-\u9fa5]/;
 
@@ -893,7 +973,7 @@
 
                     for (let i = 0; i < text.length; i++) {
                         if (chineseCharRegex.test(text[i])) {
-                            charCardsQueue.push({
+                            cards.push({
                                 char: text[i],
                                 chapterTitle: chapterTitle,
                                 fullText: text,
@@ -904,16 +984,23 @@
                 }
             });
 
-            if (charCardsQueue.length === 0) {
+            if (cards.length === 0) {
                 alert('请至少勾选一个包含汉字的段落！');
                 return;
             }
 
-            startQueuePractice();
+            startQueuePractice(cards, false);
         }
 
-        function startQueuePractice() {
-            // 打乱卡片
+        function startQueuePractice(cards, isWrongLoop = false, totalWrong = 0) {
+            document.getElementById('result-overlay').style.display = 'none';
+
+            isWrongMode = isWrongLoop;
+            wrongTotalCount = totalWrong;
+
+            initialCardsQueue = [...cards];
+            charCardsQueue = [...cards];
+
             for (let i = charCardsQueue.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [charCardsQueue[i], charCardsQueue[j]] = [charCardsQueue[j], charCardsQueue[i]];
@@ -927,21 +1014,31 @@
             renderCurrentQuestion();
         }
 
-        /* --------------- 练习控制与遮罩交互 --------------- */
-
         function renderCurrentQuestion() {
             if (currentIndex >= charCardsQueue.length) {
                 savePracticeSession();
-                alert(`练习完成！\n认识: ${stats.correct} 字\n不认识: ${stats.wrong} 字`);
-                switchNav('stats');
+                showPracticeResultModal();
                 return;
             }
 
             resetContextMask();
             const card = charCardsQueue[currentIndex];
 
+            const wrongBanner = document.getElementById('wrong-mode-banner');
+            const charCardEl = document.getElementById('display-char-card');
+
+            // 根据是否是错题重练模式切换 UI 样式（包含字卡颜色）
+            if (isWrongMode) {
+                wrongBanner.style.display = 'block';
+                wrongBanner.textContent = `错题练习 ${currentIndex + 1}/${wrongTotalCount}`;
+                charCardEl.classList.add('is-wrong-mode'); // 字体显示红色的 CSS 类
+            } else {
+                wrongBanner.style.display = 'none';
+                charCardEl.classList.remove('is-wrong-mode');
+            }
+
             document.getElementById('display-chapter').textContent = card.chapterTitle;
-            document.getElementById('display-char-card').textContent = card.char;
+            charCardEl.textContent = card.char;
 
             const before = card.fullText.substring(0, card.charIndex);
             const after = card.fullText.substring(card.charIndex + 1);
@@ -983,7 +1080,7 @@
             const char = card.char;
 
             if (!currentSessionDetails[char]) {
-                currentSessionDetails[char] = { correct: 0, wrong: 0 };
+                currentSessionDetails[char] = { correct: 0, wrong: 0, cardRef: card };
             }
 
             if (isCorrect) {
@@ -999,6 +1096,48 @@
         function nextQuestion() {
             currentIndex++;
             renderCurrentQuestion();
+        }
+
+        function showPracticeResultModal() {
+            const overlay = document.getElementById('result-overlay');
+            const card = document.getElementById('result-card');
+            const titleEl = document.getElementById('result-title');
+            const msgEl = document.getElementById('result-msg');
+
+            const totalCount = charCardsQueue.length;
+            const wrongCount = stats.wrong;
+
+            if (wrongCount === 0) {
+                card.className = 'result-card success';
+                titleEl.textContent = ' 🎉 太棒了！';
+                msgEl.textContent = `本次全部答对 ${totalCount} 字，完全掌握！`;
+            } else {
+                card.className = 'result-card has-wrong';
+                titleEl.textContent = '💪 继续加油！';
+                msgEl.textContent = `正确：${stats.correct}，错误：${wrongCount}，有 ${wrongCount} 个错题哦，加强练习吧。`;
+            }
+
+            overlay.style.display = 'flex';
+        }
+
+        function retryLastPractice() {
+            let wrongCards = [];
+            for (let char in currentSessionDetails) {
+                if (currentSessionDetails[char].wrong > 0) {
+                    wrongCards.push(currentSessionDetails[char].cardRef);
+                }
+            }
+
+            if (wrongCards.length > 0) {
+                startQueuePractice(wrongCards, true, wrongCards.length);
+            } else {
+                startQueuePractice(initialCardsQueue, false);
+            }
+        }
+
+        function goToContentSelect() {
+            document.getElementById('result-overlay').style.display = 'none';
+            switchNav('select');
         }
 
         function savePracticeSession() {
@@ -1029,8 +1168,6 @@
             const day = String(d.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
-
-        /* ------------------ 渲染统计页逻辑 ------------------ */
 
         function renderStatisticsPage() {
             const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
