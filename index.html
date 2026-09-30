@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>论语背诵练习</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+            color: #333;
+        }
+
+        /* 主容器：自适应桌面与移动端 */
+        .app-card {
+            width: 100%;
+            max-width: 900px;
+            min-height: 85vh;
+            height: 85vh;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 页面切换控制 */
+        .page {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            padding: 24px;
+            overflow: hidden;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* 第一页：选择页样式 */
+        .page-title {
+            font-size: clamp(20px, 4vw, 26px);
+            font-weight: bold;
+            color: #1a237e;
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #e8eaf6;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .tree-container {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+            margin-bottom: 16px;
+        }
+
+        /* 树形层级 */
+        .book-item {
+            margin-bottom: 12px;
+        }
+
+        .book-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 8px 12px;
+            background-color: #e8eaf6;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .chapter-item {
+            margin-left: 16px;
+            margin-bottom: 8px;
+            border-left: 2px solid #c5cae9;
+            padding-left: 12px;
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #3949ab;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+
+        .paragraph-list {
+            margin-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .paragraph-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.95rem;
+            color: #555;
+            cursor: pointer;
+            line-height: 1.5;
+            padding: 4px 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .paragraph-item:hover {
+            background-color: #f5f5f5;
+        }
+
+        /* 圆形复选框样式 */
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #7986cb;
+            border-radius: 50%;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            margin-top: 2px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #3f51b5;
+            border-color: #3f51b5;
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* 按钮底栏 */
+        .button-bar {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .btn {
+            flex: 1;
+            max-width: 200px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .btn-secondary {
+            background-color: #e0e0e0;
+            color: #424242;
+        }
+
+        .btn-secondary:hover {
+            background-color: #d5d5d5;
+        }
+
+        .btn-primary {
+            background-color: #3f51b5;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #303f9f;
+        }
+
+        .btn-danger {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c62828;
+        }
+
+        .btn-success {
+            background-color: #43a047;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #2e7d32;
+        }
+
+        /* 第二页：练习页样式（自适应布局） */
+        .practice-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 16px;
+        }
+
+        /* 上半屏：内容展示区 */
+        .content-display {
+            flex: 1;
+            background-color: #f9fbe7;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .chapter-tag {
+            font-size: 0.9rem;
+            color: #827717;
+            background-color: #f0f4c3;
+            padding: 4px 12px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
+        .paragraph-text {
+            font-size: clamp(18px, 3.5vw, 26px);
+            line-height: 1.8;
+            color: #212121;
+            text-align: justify;
+            word-break: break-all;
+        }
+
+        /* 下半屏：交互与控制区 */
+        .controls-area {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        /* 进度条 */
+        .progress-bar-container {
+            width: 100%;
+            height: 10px;
+            background-color: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: #3f51b5;
+            transition: width 0.3s ease;
+        }
+
+        /* 对错统计 */
+        .stats-board {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        .stat-correct { color: #43a047; }
+        .stat-wrong { color: #e53935; }
+        .stat-total { color: #757575; }
+
+        /* 对错判断按钮 */
+        .action-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        /* 媒体查询：在大屏幕/电脑端（min-width: 768px）优化左右或上下排版比例 */
+        @media (min-width: 768px) {
+            .app-card {
+                height: 80vh;
+            }
+
+            .paragraph-text {
+                padding: 0 20px;
+            }
+        }
+
+        /* 加载与错误提示 */
+        .loading-text {
+            text-align: center;
+            color: #666;
+            font-size: 1.1rem;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-card">
+        <!-- 第一页：内容选择页 -->
+        <div id="page-select" class="page active">
+            <div class="page-title">《论语》考察内容选择</div>
+            <div id="tree-container" class="tree-container">
+                <div class="loading-text">正在加载 lunyu.txt 内容...</div>
+            </div>
+            <div class="button-bar">
+                <button class="btn btn-secondary" onclick="resetSelection()">重新选择</button>
+                <button class="btn btn-primary" onclick="startPractice()">开始练习</button>
+            </div>
+        </div>
+
+        <!-- 第二页：练习页 -->
+        <div id="page-practice" class="page">
+            <div class="practice-container">
+                <!-- 上半屏：文本显示区 -->
+                <div class="content-display">
+                    <div id="display-chapter" class="chapter-tag">章节名称</div>
+                    <div id="display-text" class="paragraph-text">准备开始...</div>
+                </div>
+
+                <!-- 下半屏：控制与统计区 -->
+                <div class="controls-area">
+                    <!-- 进度条 -->
+                    <div class="progress-bar-container">
+                        <div id="progress-fill" class="progress-bar-fill"></div>
+                    </div>
+
+                    <!-- 对错统计 -->
+                    <div class="stats-board">
+                        <div>正确: <span id="stat-correct" class="stat-correct">0</span></div>
+                        <div>错误: <span id="stat-wrong" class="stat-wrong">0</span></div>
+                        <div>剩余: <span id="stat-remaining" class="stat-total">0</span></div>
+                    </div>
+
+                    <!-- 对错按钮 -->
+                    <div class="action-row">
+                        <button class="btn btn-success" onclick="recordAnswer(true)">正确 (✓)</button>
+                        <button class="btn btn-danger" onclick="recordAnswer(false)">错误 (✕)</button>
+                    </div>
+
+                    <!-- 底部控制按钮 -->
+                    <div class="button-bar">
+                        <button class="btn btn-secondary" onclick="backToSelect()">重新选择</button>
+                        <button class="btn btn-primary" onclick="nextQuestion()">下一个</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局数据结构与状态
+        let parsedData = { book: "论语", chapters: [] };
+        let selectedParagraphs = [];
+        let practiceQueue = [];
+        let currentIndex = 0;
+        let stats = { correct: 0, wrong: 0 };
+
+        // 页面加载完成后自动读取同目录下的 lunyu.txt
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchLunyuText();
+        });
+
+        // 1. 读取并解析 lunyu.txt
+        async function fetchLunyuText() {
+            const treeContainer = document.getElementById('tree-container');
+            try {
+                const response = await fetch('./lunyu.txt');
+                if (!response.ok) {
+                    throw new Error(`无法获取文件，状态码: ${response.status}`);
+                }
+                const text = await response.text();
+                parseLunyuFormat(text);
+                renderSelectionTree();
+            } catch (err) {
+                console.error(err);
+                treeContainer.innerHTML = `<div class="loading-text" style="color:#e53935;">
+                    读取 lunyu.txt 失败！<br>请确保 html 与 lunyu.txt 在同一目录下，且通过 HTTP 服务访问。
+                </div>`;
+            }
+        }
+
+        // 解析标签式文本格式
+        function parseLunyuFormat(rawText) {
+            // 提取 <book>
+            const bookMatch = rawText.match(/<book>(.*?)<\/book>/s);
+            if (bookMatch) {
+                parsedData.book = bookMatch[1].trim();
+            }
+
+            // 提取 <content> 内文本
+            const contentMatch = rawText.match(/<content>([\s\S]*?)<\/content>/s);
+            const contentText = contentMatch ? contentMatch[1] : rawText;
+
+            // 按章节分割（如“学而第一”、“为政第二”等）
+            const lines = contentText.split('\n');
+            let currentChapter = null;
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+
+                // 匹配章节标题：形如 "学而第一"、"为政第二" 等
+                if (/^[\u4e00-\u9fa5]+第[一二三四五六七八九十]+$/.test(trimmed)) {
+                    currentChapter = {
+                        title: trimmed,
+                        paragraphs: []
+                    };
+                    parsedData.chapters.push(currentChapter);
+                } else if (currentChapter) {
+                    // 章节下的段落内容
+                    currentChapter.paragraphs.push(trimmed);
+                }
+            });
+        }
+
+        // 2. 渲染第一页内容选择树
+        function renderSelectionTree() {
+            const container = document.getElementById('tree-container');
+            container.innerHTML = '';
+
+            const bookDiv = document.createElement('div');
+            bookDiv.className = 'book-item';
+            
+            const bookTitle = document.createElement('div');
+            bookTitle.className = 'book-title';
+            bookTitle.textContent = parsedData.book;
+            bookDiv.appendChild(bookTitle);
+
+            parsedData.chapters.forEach((chap, cIdx) => {
+                const chapDiv = document.createElement('div');
+                chapDiv.className = 'chapter-item';
+
+                // 章节标头 + 章节勾选框
+                const chapHeader = document.createElement('div');
+                chapHeader.className = 'chapter-header';
+                
+                const chapCheckbox = document.createElement('input');
+                chapCheckbox.type = 'checkbox';
+                chapCheckbox.id = `chap-${cIdx}`;
+                chapCheckbox.onchange = (e) => toggleChapter(cIdx, e.target.checked);
+
+                const chapLabel = document.createElement('label');
+                chapLabel.htmlFor = `chap-${cIdx}`;
+                chapLabel.textContent = chap.title;
+                chapLabel.style.cursor = 'pointer';
+
+                chapHeader.appendChild(chapCheckbox);
+                chapHeader.appendChild(chapLabel);
+                chapDiv.appendChild(chapHeader);
+
+                // 段落列表
+                const paraList = document.createElement('div');
+                paraList.className = 'paragraph-list';
+
+                chap.paragraphs.forEach((para, pIdx) => {
+                    const paraItem = document.createElement('div');
+                    paraItem.className = 'paragraph-item';
+
+                    const paraCheckbox = document.createElement('input');
+                    paraCheckbox.type = 'checkbox';
+                    paraCheckbox.id = `para-${cIdx}-${pIdx}`;
+                    paraCheckbox.className = `p-check-${cIdx}`;
+                    paraCheckbox.dataset.chapIndex = cIdx;
+                    paraCheckbox.dataset.paraIndex = pIdx;
+                    paraCheckbox.onchange = () => updateChapterCheckbox(cIdx);
+
+                    const paraLabel = document.createElement('label');
+                    paraLabel.htmlFor = `para-${cIdx}-${pIdx}`;
+                    // 仅截取前20字显示概要
+                    const shortText = para.length > 25 ? para.substring(0, 25) + '...' : para;
+                    paraLabel.textContent = `${pIdx + 1}. ${shortText}`;
+                    paraLabel.style.cursor = 'pointer';
+
+                    paraItem.appendChild(paraCheckbox);
+                    paraItem.appendChild(paraLabel);
+                    paraList.appendChild(paraItem);
+                });
+
+                chapDiv.appendChild(paraList);
+                bookDiv.appendChild(chapDiv);
+            });
+
+            container.appendChild(bookDiv);
+        }
+
+        // 章节全选 / 反选段落
+        function toggleChapter(cIdx, isChecked) {
+            const checkboxes = document.querySelectorAll(`.p-check-${cIdx}`);
+            checkboxes.forEach(cb => cb.checked = isChecked);
+        }
+
+        // 子段落改变时更新章节勾选框状态
+        function updateChapterCheckbox(cIdx) {
+            const chapCb = document.getElementById(`chap-${cIdx}`);
+            const checkboxes = Array.from(document.querySelectorAll(`.p-check-${cIdx}`));
+            const allChecked = checkboxes.every(cb => cb.checked);
+            chapCb.checked = allChecked;
+        }
+
+        // 取消所有选择
+        function resetSelection() {
+            const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+        }
+
+        // 3. 开始练习与初始化练习队列
+        function startPractice() {
+            selectedParagraphs = [];
+            const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const cIdx = cb.dataset.chapIndex;
+                    const pIdx = cb.dataset.paraIndex;
+                    selectedParagraphs.push({
+                        chapterTitle: parsedData.chapters[cIdx].title,
+                        text: parsedData.chapters[cIdx].paragraphs[pIdx]
+                    });
+                }
+            });
+
+            if (selectedParagraphs.length === 0) {
+                alert('请至少勾选一个章节或段落！');
+                return;
+            }
+
+            // 深拷贝生成练习队列
+            practiceQueue = [...selectedParagraphs];
+            currentIndex = 0;
+            stats = { correct: 0, wrong: 0 };
+
+            // 切换页面
+            document.getElementById('page-select').classList.remove('active');
+            document.getElementById('page-practice').classList.add('active');
+
+            renderCurrentQuestion();
+        }
+
+        // 渲染当前练习题目
+        function renderCurrentQuestion() {
+            if (currentIndex >= practiceQueue.length) {
+                alert(`练习完成！\n正确: ${stats.correct} 次\n错误: ${stats.wrong} 次`);
+                backToSelect();
+                return;
+            }
+
+            const current = practiceQueue[currentIndex];
+            document.getElementById('display-chapter').textContent = current.chapterTitle;
+            document.getElementById('display-text').textContent = current.text;
+
+            // 更新进度条与统计
+            const total = practiceQueue.length;
+            const progress = (currentIndex / total) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+
+            document.getElementById('stat-correct').textContent = stats.correct;
+            document.getElementById('stat-wrong').textContent = stats.wrong;
+            document.getElementById('stat-remaining').textContent = total - currentIndex;
+        }
+
+        // 记录答题对错
+        function recordAnswer(isCorrect) {
+            if (isCorrect) {
+                stats.correct++;
+            } else {
+                stats.wrong++;
+            }
+            nextQuestion();
+        }
+
+        // 下一个
+        function nextQuestion() {
+            currentIndex++;
+            renderCurrentQuestion();
+        }
+
+        // 返回选择页
+        function backToSelect() {
+            document.getElementById('page-practice').classList.remove('active');
+            document.getElementById('page-select').classList.add('active');
+        }
+    </script>
+</body>
+</html>
