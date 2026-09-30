@@ -18,7 +18,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 0;
             color: #333;
         }
 
@@ -26,15 +26,54 @@
         .app-card {
             width: 100%;
             max-width: 900px;
-            min-height: 85vh;
-            height: 85vh;
+            height: 100vh;
             background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
             overflow: hidden;
             position: relative;
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 16px; }
+            .app-card {
+                height: 85vh;
+                border-radius: 16px;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            }
+        }
+
+        /* 底部导航栏 */
+        .nav-bar {
+            display: flex;
+            height: 56px;
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #757575;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #3f51b5;
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
         }
 
         /* 页面切换 */
@@ -42,9 +81,9 @@
             display: none;
             flex: 1;
             flex-direction: column;
-            height: 100%;
+            height: calc(100% - 56px);
             width: 100%;
-            padding: 24px;
+            padding: 16px;
             overflow: hidden;
         }
 
@@ -52,34 +91,29 @@
             display: flex;
         }
 
-        /* 第一页：选择页样式 */
         .page-title {
-            font-size: clamp(20px, 4vw, 26px);
+            font-size: 1.2rem;
             font-weight: bold;
             color: #1a237e;
             text-align: center;
-            padding-bottom: 16px;
+            padding-bottom: 12px;
             border-bottom: 2px solid #e8eaf6;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             flex-shrink: 0;
         }
 
+        /* 第一页：选择页样式 */
         .tree-container {
             flex: 1;
             overflow-y: auto;
-            padding-right: 8px;
-            margin-bottom: 16px;
-        }
-
-        /* 可折叠层级样式 */
-        .book-item {
+            padding-right: 4px;
             margin-bottom: 12px;
         }
 
         .book-header {
             display: flex;
             align-items: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: #2c3e50;
             padding: 8px 12px;
@@ -87,7 +121,6 @@
             border-radius: 8px;
             margin-bottom: 8px;
             cursor: pointer;
-            user-select: none;
         }
 
         .toggle-icon {
@@ -96,64 +129,49 @@
             text-align: center;
             margin-right: 6px;
             font-size: 0.8rem;
-            transition: transform 0.2s ease;
             color: #5c6bc0;
         }
 
-        .chapter-list {
-            display: block;
-        }
-
         .chapter-item {
-            margin-left: 16px;
+            margin-left: 12px;
             margin-bottom: 8px;
             border-left: 2px solid #c5cae9;
-            padding-left: 12px;
+            padding-left: 10px;
         }
 
         .chapter-header {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #3949ab;
             cursor: pointer;
-            padding: 6px 0;
-            user-select: none;
+            padding: 4px 0;
         }
 
         .paragraph-list {
-            margin-left: 20px;
+            margin-left: 16px;
             display: flex;
             flex-direction: column;
             gap: 6px;
             margin-top: 4px;
         }
 
-        /* 折叠隐藏类 */
-        .collapsed {
-            display: none !important;
-        }
+        .collapsed { display: none !important; }
 
         .paragraph-item {
             display: flex;
             align-items: flex-start;
             gap: 8px;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: #555;
             cursor: pointer;
-            line-height: 1.5;
-            padding: 4px 6px;
+            line-height: 1.4;
+            padding: 4px;
             border-radius: 6px;
-            transition: background 0.2s;
         }
 
-        .paragraph-item:hover {
-            background-color: #f5f5f5;
-        }
-
-        /* 复选框样式 */
         input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
@@ -166,7 +184,6 @@
             position: relative;
             flex-shrink: 0;
             margin-top: 2px;
-            transition: all 0.2s ease;
         }
 
         input[type="checkbox"]:checked {
@@ -177,8 +194,8 @@
         input[type="checkbox"]:checked::after {
             content: '';
             position: absolute;
-            top: 3px;
-            left: 6px;
+            top: 2px;
+            left: 5px;
             width: 4px;
             height: 8px;
             border: solid white;
@@ -186,49 +203,40 @@
             transform: rotate(45deg);
         }
 
-        /* 底栏与按钮 */
+        /* 按钮与通用底部栏 */
         .button-bar {
             display: flex;
-            gap: 12px;
+            gap: 10px;
             justify-content: center;
-            padding-top: 12px;
+            padding-top: 10px;
             border-top: 1px solid #eee;
             flex-shrink: 0;
-            flex-wrap: wrap;
         }
 
         .btn {
             flex: 1;
-            min-width: 120px;
-            max-width: 180px;
-            padding: 10px 16px;
-            font-size: 0.95rem;
+            padding: 10px 12px;
+            font-size: 0.9rem;
             font-weight: bold;
             border: none;
-            border-radius: 25px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: all 0.2s;
             text-align: center;
         }
 
         .btn-secondary { background-color: #e0e0e0; color: #424242; }
-        .btn-secondary:hover { background-color: #d5d5d5; }
         .btn-primary { background-color: #3f51b5; color: white; }
-        .btn-primary:hover { background-color: #303f9f; }
         .btn-danger { background-color: #e53935; color: white; }
-        .btn-danger:hover { background-color: #c62828; }
         .btn-success { background-color: #43a047; color: white; }
-        .btn-success:hover { background-color: #2e7d32; }
         .btn-info { background-color: #0288d1; color: white; }
-        .btn-info:hover { background-color: #0277bd; }
 
         /* 第二页：抽卡识字界面 */
         .practice-container {
             display: flex;
             flex-direction: column;
             height: 100%;
-            gap: 16px;
+            gap: 12px;
         }
 
         .content-display {
@@ -236,101 +244,82 @@
             background-color: #f9fbe7;
             border: 1px solid #e0e0e0;
             border-radius: 12px;
-            padding: 24px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             overflow-y: auto;
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
-            text-align: center;
             position: relative;
         }
 
         .chapter-tag {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #827717;
             background-color: #f0f4c3;
-            padding: 4px 12px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+            padding: 4px 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             font-weight: bold;
         }
 
-        /* 抽取的大字框（汉字卡片） */
         .single-char-card {
-            font-size: clamp(72px, 18vw, 120px);
+            font-size: clamp(64px, 16vw, 100px);
             font-weight: bold;
             color: #1a237e;
             background: #ffffff;
-            width: clamp(120px, 30vw, 180px);
-            height: clamp(120px, 30vw, 180px);
+            width: clamp(110px, 28vw, 160px);
+            height: clamp(110px, 28vw, 160px);
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
             border: 2px solid #c5cae9;
-            margin: 10px 0;
+            margin: 6px 0;
             user-select: none;
         }
 
-        /* 上下文出处提示 */
         .context-text {
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #555;
-            margin-top: 12px;
-            line-height: 1.6;
-            max-width: 90%;
-            display: none; /* 默认隐藏上下文 */
+            margin-top: 8px;
+            line-height: 1.5;
+            max-width: 95%;
+            display: none;
             background-color: #ffffff;
-            padding: 12px;
+            padding: 10px;
             border-radius: 8px;
             border-left: 4px solid #3f51b5;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
         }
 
-        .context-text.show {
-            display: block;
-        }
-
-        /* 出处段落中的高亮大字 */
-        .highlight-char {
-            color: #e53935;
-            font-weight: bold;
-            font-size: 1.15em;
-            text-decoration: underline;
-        }
+        .context-text.show { display: block; }
+        .highlight-char { color: #e53935; font-weight: bold; font-size: 1.15em; text-decoration: underline; }
 
         .controls-area {
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
             flex-shrink: 0;
         }
 
         .progress-bar-container {
             width: 100%;
-            height: 10px;
+            height: 8px;
             background-color: #e0e0e0;
-            border-radius: 5px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background-color: #3f51b5;
-            transition: width 0.3s ease;
-        }
+        .progress-bar-fill { height: 100%; width: 0%; background-color: #3f51b5; transition: width 0.3s; }
 
         .stats-board {
             display: flex;
             justify-content: space-around;
             background-color: #f5f5f5;
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: bold;
         }
 
@@ -338,32 +327,184 @@
         .stat-wrong { color: #e53935; }
         .stat-total { color: #757575; }
 
-        .action-row {
+        /* 第三页：统计页样式 */
+        .stats-container {
+            flex: 1;
+            overflow-y: auto;
             display: flex;
+            flex-direction: column;
             gap: 16px;
+            padding-right: 4px;
+        }
+
+        .section-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1a237e;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 日期分组及展开/收起 */
+        .date-group {
+            margin-bottom: 10px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .date-header {
+            background-color: #f5f5f5;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .date-content {
+            padding: 8px 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* 学习历程特殊展示样式 */
+        .history-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 1.05rem;
+            font-weight: 500;
+            background: #fafafa;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+
+        .score-box {
+            display: inline-flex;
+            flex-direction: column;
             justify-content: center;
+            font-size: 0.65rem;
+            line-height: 1.1;
+            height: 1.3em; /* 确保两行与文字同高 */
         }
 
-        @media (min-width: 768px) {
-            .app-card { height: 80vh; }
+        .score-correct { color: #43a047; }
+        .score-wrong { color: #e53935; }
+
+        /* 错题本单项 */
+        .wrong-book-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 1rem;
+            background-color: #ffebee;
+            padding: 2px 8px;
+            border-radius: 6px;
+            color: #c62828;
         }
 
-        .loading-text {
-            text-align: center;
-            color: #666;
+        .wrong-count-badge {
+            font-size: 0.75rem;
+            color: #e53935;
+            font-weight: bold;
+        }
+
+        /* 错字统计按行列表 */
+        .stat-row-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-row-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .stat-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #fafafa;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .stat-char-badge {
             font-size: 1.1rem;
-            margin-top: 40px;
+            font-weight: bold;
+            color: #1a237e;
+        }
+
+        .stat-detail-dates {
+            padding: 8px 12px;
+            background-color: #fff;
+            font-size: 0.8rem;
+            color: #666;
+            border-top: 1px dashed #eee;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .date-chip {
+            background-color: #f0f4c3;
+            color: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* 查看更多按钮 */
+        .btn-more {
+            width: 100%;
+            padding: 6px;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            color: #555;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .empty-tips {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+            padding: 12px 0;
         }
     </style>
 </head>
 <body>
 
     <div class="app-card">
-        <!-- 第一页：内容选择页 -->
+        <!-- 第一页：内容选择 -->
         <div id="page-select" class="page active">
-            <div class="page-title">《论语》抽卡识字选择</div>
+            <div class="page-title">《论语》识字 - 内容选择</div>
             <div id="tree-container" class="tree-container">
-                <div class="loading-text">正在加载 lunyu.txt 内容...</div>
+                <div style="text-align: center; color: #666; margin-top: 20px;">正在加载内容...</div>
             </div>
             <div class="button-bar">
                 <button class="btn btn-secondary" onclick="resetSelection()">重置勾选</button>
@@ -371,16 +512,12 @@
             </div>
         </div>
 
-        <!-- 第二页：抽卡识字练习页 -->
+        <!-- 第二页：练习 -->
         <div id="page-practice" class="page">
             <div class="practice-container">
                 <div class="content-display">
                     <div id="display-chapter" class="chapter-tag">章节名称</div>
-                    
-                    <!-- 抽取的单字卡片 -->
                     <div id="display-char-card" class="single-char-card">字</div>
-
-                    <!-- 原文上下文出处（默认隐藏，点击查看答案显示） -->
                     <div id="display-context" class="context-text">出处段落...</div>
                 </div>
 
@@ -395,35 +532,97 @@
                         <div>剩余卡片: <span id="stat-remaining" class="stat-total">0</span></div>
                     </div>
 
-                    <div class="action-row">
+                    <div class="action-row" style="display:flex; gap:10px;">
                         <button class="btn btn-success" onclick="recordAnswer(true)">认识 (✓)</button>
                         <button class="btn btn-danger" onclick="recordAnswer(false)">不认识 (✕)</button>
                     </div>
 
                     <div class="button-bar">
                         <button class="btn btn-info" onclick="toggleContext()">出处上下文</button>
-                        <button class="btn btn-secondary" onclick="backToSelect()">重新选择</button>
                         <button class="btn btn-primary" onclick="nextQuestion()">下一个</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 第三页：统计 -->
+        <div id="page-stats" class="page">
+            <div class="page-title">学习数据统计</div>
+            <div class="stats-container">
+                
+                <!-- 1. 学习历程 -->
+                <div class="section-card">
+                    <div class="section-title">学习历程</div>
+                    <div id="history-container"></div>
+                    <button id="btn-history-more" class="btn-more" onclick="showAllHistory()" style="display:none;">查看更多日期</button>
+                </div>
+
+                <!-- 2. 错题本 -->
+                <div class="section-card">
+                    <div class="section-title">错题本</div>
+                    <div id="wrong-book-container"></div>
+                    <button id="btn-wrong-more" class="btn-more" onclick="showAllWrongBook()" style="display:none;">查看更多日期</button>
+                </div>
+
+                <!-- 3. 错字统计 -->
+                <div class="section-card">
+                    <div class="section-title">错字统计（按错误频次）</div>
+                    <div id="stat-char-container" class="stat-row-list"></div>
+                    <button id="btn-stat-more" class="btn-more" onclick="showAllStatChars()" style="display:none;">查看更多高频错字</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="nav-bar">
+            <div id="nav-select" class="nav-item active" onclick="switchNav('select')">
+                <div class="nav-icon">📚</div>
+                <div>内容选择</div>
+            </div>
+            <div id="nav-practice" class="nav-item" onclick="switchNav('practice')">
+                <div class="nav-icon">🎴</div>
+                <div>练习</div>
+            </div>
+            <div id="nav-stats" class="nav-item" onclick="switchNav('stats')">
+                <div class="nav-icon">📊</div>
+                <div>统计</div>
             </div>
         </div>
     </div>
 
     <script>
         let parsedData = { book: "论语", chapters: [] };
-        let charCardsQueue = []; // 抽卡池队列
+        let charCardsQueue = [];
         let currentIndex = 0;
         let stats = { correct: 0, wrong: 0 };
-        let isContextShown = false;
+        let currentSessionDetails = {}; // 记录本次练习每个汉字的对错情况
+
+        // 展开/收起控制变量
+        let showAllHistoryDates = false;
+        let showAllWrongDates = false;
+        let showAllStatRows = false;
 
         document.addEventListener("DOMContentLoaded", () => {
             fetchLunyuText();
         });
 
-        // 1. 读取 lunyu.txt (防缓存)
+        // 导航栏切换
+        function switchNav(target) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`nav-${target}`).classList.add('active');
+            document.getElementById(`page-${target}`).classList.add('active');
+
+            if (target === 'stats') {
+                renderStatisticsPage();
+            }
+        }
+
+        // 读取 lunyu.txt
         async function fetchLunyuText() {
-            const treeContainer = document.getElementById('tree-container');
+            const container = document.getElementById('tree-container');
             try {
                 const response = await fetch(`lunyu.txt?v=${new Date().getTime()}`);
                 if (!response.ok) throw new Error(`状态码: ${response.status}`);
@@ -431,14 +630,10 @@
                 parseLunyuFormat(text);
                 renderSelectionTree();
             } catch (err) {
-                console.error(err);
-                treeContainer.innerHTML = `<div class="loading-text" style="color:#e53935;">
-                    读取 lunyu.txt 失败！<br>请确保 html 与 lunyu.txt 在同一目录下，且通过 HTTP 服务访问。
-                </div>`;
+                container.innerHTML = `<div style="color:#e53935; text-align:center;">读取 lunyu.txt 失败！请确保本地网络/服务正常。</div>`;
             }
         }
 
-        // 解析标签式文本
         function parseLunyuFormat(rawText) {
             const bookMatch = rawText.match(/<book>(.*?)<\/book>/s);
             if (bookMatch) parsedData.book = bookMatch[1].trim();
@@ -452,7 +647,6 @@
             lines.forEach(line => {
                 const trimmed = line.trim();
                 if (!trimmed) return;
-
                 if (/^[\u4e00-\u9fa5]+第[一二三四五六七八九十]+$/.test(trimmed)) {
                     currentChapter = { title: trimmed, paragraphs: [] };
                     parsedData.chapters.push(currentChapter);
@@ -462,20 +656,17 @@
             });
         }
 
-        // 2. 渲染树形多选
         function renderSelectionTree() {
             const container = document.getElementById('tree-container');
             container.innerHTML = '';
 
             const bookDiv = document.createElement('div');
-            bookDiv.className = 'book-item';
             
             const bookHeader = document.createElement('div');
             bookHeader.className = 'book-header';
             bookHeader.innerHTML = `<span class="toggle-icon" id="book-icon">▼</span><span>${parsedData.book}</span>`;
             
             const chapterList = document.createElement('div');
-            chapterList.className = 'chapter-list';
 
             bookHeader.onclick = () => {
                 const isCollapsed = chapterList.classList.toggle('collapsed');
@@ -531,7 +722,7 @@
 
                     const paraLabel = document.createElement('label');
                     paraLabel.htmlFor = `para-${cIdx}-${pIdx}`;
-                    const shortText = para.length > 25 ? para.substring(0, 25) + '...' : para;
+                    const shortText = para.length > 20 ? para.substring(0, 20) + '...' : para;
                     paraLabel.textContent = `${pIdx + 1}. ${shortText}`;
 
                     paraItem.appendChild(paraCheckbox);
@@ -562,7 +753,6 @@
             document.querySelectorAll('#tree-container input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
-        // 3. 构建识字卡片池并开始练习
         function startPractice() {
             charCardsQueue = [];
             const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
@@ -575,7 +765,6 @@
                     const chapterTitle = parsedData.chapters[cIdx].title;
                     const text = parsedData.chapters[cIdx].paragraphs[pIdx];
 
-                    // 从该段落中挑取汉字生成单字卡片
                     for (let i = 0; i < text.length; i++) {
                         if (chineseCharRegex.test(text[i])) {
                             charCardsQueue.push({
@@ -594,7 +783,6 @@
                 return;
             }
 
-            // 随机打乱卡片顺序（洗牌算法）
             for (let i = charCardsQueue.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [charCardsQueue[i], charCardsQueue[j]] = [charCardsQueue[j], charCardsQueue[i]];
@@ -602,18 +790,17 @@
 
             currentIndex = 0;
             stats = { correct: 0, wrong: 0 };
+            currentSessionDetails = {};
 
-            document.getElementById('page-select').classList.remove('active');
-            document.getElementById('page-practice').classList.add('active');
-
+            switchNav('practice');
             renderCurrentQuestion();
         }
 
-        // 4. 渲染单字卡片
         function renderCurrentQuestion() {
             if (currentIndex >= charCardsQueue.length) {
-                alert(`抽卡识字完成！\n认识: ${stats.correct} 字\n不认识: ${stats.wrong} 字`);
-                backToSelect();
+                savePracticeSession();
+                alert(`本轮抽卡练习完成！\n认识: ${stats.correct} 字\n不认识: ${stats.wrong} 字`);
+                switchNav('stats');
                 return;
             }
 
@@ -623,13 +810,11 @@
             document.getElementById('display-chapter').textContent = card.chapterTitle;
             document.getElementById('display-char-card').textContent = card.char;
 
-            // 构建带有当前汉字高亮的上下文出处
             const before = card.fullText.substring(0, card.charIndex);
             const after = card.fullText.substring(card.charIndex + 1);
             document.getElementById('display-context').innerHTML = 
                 `${escapeHtml(before)}<span class="highlight-char">${escapeHtml(card.char)}</span>${escapeHtml(after)}`;
 
-            // 更新进度
             const total = charCardsQueue.length;
             const progress = (currentIndex / total) * 100;
             document.getElementById('progress-fill').style.width = `${progress}%`;
@@ -639,10 +824,8 @@
             document.getElementById('stat-remaining').textContent = total - currentIndex;
         }
 
-        // 显示/隐藏出处上下文
         function toggleContext() {
-            const contextEl = document.getElementById('display-context');
-            contextEl.classList.toggle('show');
+            document.getElementById('display-context').classList.toggle('show');
         }
 
         function hideContext() {
@@ -650,8 +833,20 @@
         }
 
         function recordAnswer(isCorrect) {
-            if (isCorrect) stats.correct++;
-            else stats.wrong++;
+            const card = charCardsQueue[currentIndex];
+            const char = card.char;
+
+            if (!currentSessionDetails[char]) {
+                currentSessionDetails[char] = { correct: 0, wrong: 0 };
+            }
+
+            if (isCorrect) {
+                stats.correct++;
+                currentSessionDetails[char].correct++;
+            } else {
+                stats.wrong++;
+                currentSessionDetails[char].wrong++;
+            }
             nextQuestion();
         }
 
@@ -660,9 +855,245 @@
             renderCurrentQuestion();
         }
 
-        function backToSelect() {
-            document.getElementById('page-practice').classList.remove('active');
-            document.getElementById('page-select').classList.add('active');
+        // 保存练习数据到 localStorage
+        function savePracticeSession() {
+            if (Object.keys(currentSessionDetails).length === 0) return;
+
+            const today = getTodayDateStr();
+            let historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
+
+            if (!historyData[today]) {
+                historyData[today] = {};
+            }
+
+            for (let char in currentSessionDetails) {
+                if (!historyData[today][char]) {
+                    historyData[today][char] = { correct: 0, wrong: 0 };
+                }
+                historyData[today][char].correct += currentSessionDetails[char].correct;
+                historyData[today][char].wrong += currentSessionDetails[char].wrong;
+            }
+
+            localStorage.setItem('lunyu_history_data', JSON.stringify(historyData));
+        }
+
+        function getTodayDateStr() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        /* ------------------ 渲染统计页逻辑 ------------------ */
+
+        function renderStatisticsPage() {
+            const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
+            const dates = Object.keys(historyData).sort().reverse(); // 按日期从近到远
+
+            renderLearningHistory(historyData, dates);
+            renderWrongBook(historyData, dates);
+            renderStatChars(historyData);
+        }
+
+        // 1. 学习历程
+        function renderLearningHistory(historyData, dates) {
+            const container = document.getElementById('history-container');
+            const moreBtn = document.getElementById('btn-history-more');
+            container.innerHTML = '';
+
+            if (dates.length === 0) {
+                container.innerHTML = '<div class="empty-tips">暂无学习记录</div>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            const today = getTodayDateStr();
+            const displayDates = showAllHistoryDates ? dates : dates.slice(0, 5);
+
+            displayDates.forEach(date => {
+                const group = document.createElement('div');
+                group.className = 'date-group';
+
+                const isToday = (date === today);
+                
+                const header = document.createElement('div');
+                header.className = 'date-header';
+                header.innerHTML = `<span>${date} ${isToday ? '(今天)' : ''}</span><span id="hist-icon-${date}">${isToday ? '▲' : '▼'}</span>`;
+
+                const content = document.createElement('div');
+                content.className = `date-content ${isToday ? '' : 'collapsed'}`;
+                content.id = `hist-content-${date}`;
+
+                header.onclick = () => {
+                    const isCollapsed = content.classList.toggle('collapsed');
+                    document.getElementById(`hist-icon-${date}`).textContent = isCollapsed ? '▼' : '▲';
+                };
+
+                const charObj = historyData[date];
+                for (let char in charObj) {
+                    const n = charObj[char].correct;
+                    const m = charObj[char].wrong;
+
+                    const item = document.createElement('div');
+                    item.className = 'history-item';
+                    item.innerHTML = `
+                        <span>${char}</span>
+                        <div class="score-box">
+                            <span class="score-correct">✓ ${n}</span>
+                            <span class="score-wrong">✕ ${m}</span>
+                        </div>
+                    `;
+                    content.appendChild(item);
+                }
+
+                group.appendChild(header);
+                group.appendChild(content);
+                container.appendChild(group);
+            });
+
+            moreBtn.style.display = dates.length > 5 && !showAllHistoryDates ? 'block' : 'none';
+        }
+
+        function showAllHistory() {
+            showAllHistoryDates = true;
+            renderStatisticsPage();
+        }
+
+        // 2. 错题本
+        function renderWrongBook(historyData, dates) {
+            const container = document.getElementById('wrong-book-container');
+            const moreBtn = document.getElementById('btn-wrong-more');
+            container.innerHTML = '';
+
+            // 筛选出有错字的日期
+            const wrongDates = dates.filter(date => {
+                const charObj = historyData[date];
+                return Object.keys(charObj).some(c => charObj[c].wrong > 0);
+            });
+
+            if (wrongDates.length === 0) {
+                container.innerHTML = '<div class="empty-tips">暂无错字记录</div>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            const today = getTodayDateStr();
+            const displayDates = showAllWrongDates ? wrongDates : wrongDates.slice(0, 5);
+
+            displayDates.forEach(date => {
+                const group = document.createElement('div');
+                group.className = 'date-group';
+
+                const isToday = (date === today);
+
+                const header = document.createElement('div');
+                header.className = 'date-header';
+                header.innerHTML = `<span>${date} ${isToday ? '(今天)' : ''}</span><span id="wrong-icon-${date}">${isToday ? '▲' : '▼'}</span>`;
+
+                const content = document.createElement('div');
+                content.className = `date-content ${isToday ? '' : 'collapsed'}`;
+                content.id = `wrong-content-${date}`;
+
+                header.onclick = () => {
+                    const isCollapsed = content.classList.toggle('collapsed');
+                    document.getElementById(`wrong-icon-${date}`).textContent = isCollapsed ? '▼' : '▲';
+                };
+
+                const charObj = historyData[date];
+                for (let char in charObj) {
+                    const m = charObj[char].wrong;
+                    if (m > 0) {
+                        const item = document.createElement('div');
+                        item.className = 'wrong-book-item';
+                        item.innerHTML = `<span>${char}</span><span class="wrong-count-badge">${m}</span>`;
+                        content.appendChild(item);
+                    }
+                }
+
+                group.appendChild(header);
+                group.appendChild(content);
+                container.appendChild(group);
+            });
+
+            moreBtn.style.display = wrongDates.length > 5 && !showAllWrongDates ? 'block' : 'none';
+        }
+
+        function showAllWrongBook() {
+            showAllWrongDates = true;
+            renderStatisticsPage();
+        }
+
+        // 3. 错字统计 (按频次高到低)
+        function renderStatChars(historyData) {
+            const container = document.getElementById('stat-char-container');
+            const moreBtn = document.getElementById('btn-stat-more');
+            container.innerHTML = '';
+
+            let wrongCharMap = {}; // { 字: { totalWrong: x, dates: [ '2026-09-30' ] } }
+
+            for (let date in historyData) {
+                for (let char in historyData[date]) {
+                    const wrong = historyData[date][char].wrong;
+                    if (wrong > 0) {
+                        if (!wrongCharMap[char]) {
+                            wrongCharMap[char] = { totalWrong: 0, dates: [] };
+                        }
+                        wrongCharMap[char].totalWrong += wrong;
+                        wrongCharMap[char].dates.push(`${date} (${wrong}次)`);
+                    }
+                }
+            }
+
+            // 转成数组并从高到低排序
+            let sortedWrongList = Object.keys(wrongCharMap).map(char => {
+                return {
+                    char: char,
+                    totalWrong: wrongCharMap[char].totalWrong,
+                    dates: wrongCharMap[char].dates
+                };
+            }).sort((a, b) => b.totalWrong - a.totalWrong);
+
+            if (sortedWrongList.length === 0) {
+                container.innerHTML = '<div class="empty-tips">太棒了，目前没有错字统计！</div>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            const displayRows = showAllStatRows ? sortedWrongList : sortedWrongList.slice(0, 5);
+
+            displayRows.forEach((item, idx) => {
+                const rowItem = document.createElement('div');
+                rowItem.className = 'stat-row-item';
+
+                const header = document.createElement('div');
+                header.className = 'stat-row-header';
+                header.innerHTML = `
+                    <div><span style="color:#999; margin-right:8px;">${idx + 1}</span><span class="stat-char-badge">${item.char}</span></div>
+                    <div style="font-size:0.85rem; color:#e53935; font-weight:bold;">错误 ${item.totalWrong} 次 <span style="font-size:0.75rem; color:#999;">▼</span></div>
+                `;
+
+                const detail = document.createElement('div');
+                detail.className = 'stat-detail-dates collapsed';
+                
+                let dateChips = item.dates.map(d => `<span class="date-chip">${d}</span>`).join('');
+                detail.innerHTML = `<div>错误发生日期：</div>${dateChips}`;
+
+                header.onclick = () => {
+                    detail.classList.toggle('collapsed');
+                };
+
+                rowItem.appendChild(header);
+                rowItem.appendChild(detail);
+                container.appendChild(rowItem);
+            });
+
+            moreBtn.style.display = sortedWrongList.length > 5 && !showAllStatRows ? 'block' : 'none';
+        }
+
+        function showAllStatChars() {
+            showAllStatRows = true;
+            renderStatisticsPage();
         }
 
         function escapeHtml(text) {
