@@ -316,7 +316,7 @@
         .single-char-card {
             font-size: clamp(64px, 16vw, 100px);
             font-weight: bold;
-            color: #1a237e; /* 默认深蓝色 */
+            color: #1a237e;
             background: #ffffff;
             width: clamp(110px, 28vw, 160px);
             height: clamp(110px, 28vw, 160px);
@@ -331,7 +331,6 @@
             transition: color 0.2s, border-color 0.2s;
         }
 
-        /* 错题模式下，单字卡片字体变红 */
         .single-char-card.is-wrong-mode {
             color: #e53935;
             border-color: #ef9a9a;
@@ -438,7 +437,6 @@
         }
 
         .result-card.success .result-card-title { color: #2e7d32; }
-        .result-card.has-wrong .result-card-title { color: #c62828; }
 
         .result-card-msg {
             font-size: 1rem;
@@ -509,7 +507,6 @@
             gap: 12px;
         }
 
-        /* 优化：修改历史记录卡片格式，第一行对错数量，第二行换行居中展示字 */
         .history-item {
             display: inline-flex;
             flex-direction: column;
@@ -679,10 +676,10 @@
                         <div>剩余卡片: <span id="stat-remaining" class="stat-total">0</span></div>
                     </div>
 
-                    <!-- 优化点2：认识与不认识按钮调换位置 -->
+                    <!-- 要求1：不认识在左，认识在右 -->
                     <div class="action-row" style="display:flex; gap:16px;">
-                        <button class="btn btn-success btn-large" onclick="recordAnswer(true)">认识 (✓)</button>
                         <button class="btn btn-danger btn-large" onclick="recordAnswer(false)">不认识 (✕)</button>
+                        <button class="btn btn-success btn-large" onclick="recordAnswer(true)">认识 (✓)</button>
                     </div>
                 </div>
 
@@ -749,6 +746,7 @@
         let currentIndex = 0;
         let stats = { correct: 0, wrong: 0 };
         let currentSessionDetails = {};
+        let firstRoundStats = { correct: 0, wrong: 0 }; // 专门记录第一轮的正确与错误数，用于结算弹窗展示
         let isContextRevealed = false;
 
         let isWrongMode = false;
@@ -1008,12 +1006,14 @@
             isWrongMode = isWrongLoop;
             wrongTotalCount = totalWrong;
 
-            // 如果不是错题重练模式，则更新 initialCardsQueue 供“再练一次”调用
             if (!isWrongLoop) {
                 initialCardsQueue = [...cards];
+                firstRoundStats = { correct: 0, wrong: 0 }; // 重置正常轮次统计
             }
+
             charCardsQueue = [...cards];
 
+            // 打乱卡片
             for (let i = charCardsQueue.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [charCardsQueue[i], charCardsQueue[j]] = [charCardsQueue[j], charCardsQueue[i]];
@@ -1029,9 +1029,10 @@
 
         function renderCurrentQuestion() {
             if (currentIndex >= charCardsQueue.length) {
-                savePracticeSession();
-                
-                // 优化点1：练习完成后，如果有错题，直接进入错字重练模式
+                // 保存当前轮次的全部数据到全局错题本/统计数据中
+                savePracticeSession(currentSessionDetails);
+
+                // 筛选出本轮做错的汉字卡片
                 let wrongCards = [];
                 for (let char in currentSessionDetails) {
                     if (currentSessionDetails[char].wrong > 0) {
@@ -1039,12 +1040,13 @@
                     }
                 }
 
-                if (wrongCards.length > 0 && !isWrongMode) {
-                    // 如果有错题且刚才不是错题模式，则自动启动错字重练
+                // 如果依然有做错的字，无限次触发下一轮错题重练
+                if (wrongCards.length > 0) {
                     startQueuePractice(wrongCards, true, wrongCards.length);
                     return;
                 }
 
+                // 当所有错题全部清除并通过后，展示最终结算卡片
                 showPracticeResultModal();
                 return;
             }
@@ -1055,7 +1057,6 @@
             const wrongBanner = document.getElementById('wrong-mode-banner');
             const charCardEl = document.getElementById('display-char-card');
 
-            // 优化点1：错题重练模式UI（提示语 + 单字卡片红色字）
             if (isWrongMode) {
                 wrongBanner.style.display = 'block';
                 wrongBanner.textContent = `错题练习 ${currentIndex + 1}/${wrongTotalCount}`;
@@ -1114,9 +1115,11 @@
             if (isCorrect) {
                 stats.correct++;
                 currentSessionDetails[char].correct++;
+                if (!isWrongMode) firstRoundStats.correct++;
             } else {
                 stats.wrong++;
                 currentSessionDetails[char].wrong++;
+                if (!isWrongMode) firstRoundStats.wrong++;
             }
             nextQuestion();
         }
@@ -1132,23 +1135,19 @@
             const titleEl = document.getElementById('result-title');
             const msgEl = document.getElementById('result-msg');
 
-            const totalCount = charCardsQueue.length;
-            const wrongCount = stats.wrong;
-
-            if (wrongCount === 0) {
-                card.className = 'result-card success';
-                titleEl.textContent = '🎉 太棒了！';
-                msgEl.textContent = isWrongMode ? `错题复习完成，全部掌握！` : `本次全部答对 ${totalCount} 字，完全掌握！`;
+            card.className = 'result-card success';
+            titleEl.textContent = '🎉 全部消除完成！';
+            
+            // 弹出卡片只展现正常练习轮次的正确N错误M数据
+            if (firstRoundStats.wrong > 0) {
+                msgEl.textContent = `正常轮次表现：正确 ${firstRoundStats.correct}，错误 ${firstRoundStats.wrong}。经过错题强化，目前已全部消除答对！`;
             } else {
-                card.className = 'result-card has-wrong';
-                titleEl.textContent = '💪 继续加油！';
-                msgEl.textContent = `正确：${stats.correct}，错误：${wrongCount}，还有错题需要多加练习！`;
+                msgEl.textContent = `正常轮次表现：正确 ${firstRoundStats.correct}，错误 ${firstRoundStats.wrong}。太棒了，一次全对！`;
             }
 
             overlay.style.display = 'flex';
         }
 
-        // 优化点3：再练一次是完全重新练习初始题目，与上一次练习结果无关
         function retryLastPractice() {
             if (initialCardsQueue.length > 0) {
                 startQueuePractice(initialCardsQueue, false);
@@ -1162,8 +1161,8 @@
             switchNav('select');
         }
 
-        function savePracticeSession() {
-            if (Object.keys(currentSessionDetails).length === 0) return;
+        function savePracticeSession(sessionDetailsToSave) {
+            if (!sessionDetailsToSave || Object.keys(sessionDetailsToSave).length === 0) return;
 
             const today = getTodayDateStr();
             let historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
@@ -1172,12 +1171,12 @@
                 historyData[today] = {};
             }
 
-            for (let char in currentSessionDetails) {
+            for (let char in sessionDetailsToSave) {
                 if (!historyData[today][char]) {
                     historyData[today][char] = { correct: 0, wrong: 0 };
                 }
-                historyData[today][char].correct += currentSessionDetails[char].correct;
-                historyData[today][char].wrong += currentSessionDetails[char].wrong;
+                historyData[today][char].correct += sessionDetailsToSave[char].correct;
+                historyData[today][char].wrong += sessionDetailsToSave[char].wrong;
             }
 
             localStorage.setItem('lunyu_history_data', JSON.stringify(historyData));
@@ -1200,7 +1199,6 @@
             renderStatChars(historyData);
         }
 
-        // 优化点4：修改学习历程样式（第一行正确：n 绿色，错误：M 红色，第二行换行显示字）
         function renderLearningHistory(historyData, dates) {
             const container = document.getElementById('history-container');
             const moreBtn = document.getElementById('btn-history-more');
