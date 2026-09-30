@@ -2,1384 +2,470 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>抽卡认字</title>
+    <!-- PWA 配置 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3f51b5">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2232/2232688.png">
+    
     <style>
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 0;
-            color: #333;
+            padding: 20px 10px;
         }
-
-        /* 主容器 */
-        .app-card {
-            width: 100%;
-            max-width: 900px;
-            height: 100vh;
-            background: #ffffff;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        @media (min-width: 768px) {
-            body { padding: 16px; }
-            .app-card {
-                height: 85vh;
-                border-radius: 16px;
-                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-            }
-        }
-
-        /* 底部导航栏 */
-        .nav-bar {
-            display: flex;
-            height: 56px;
-            background-color: #ffffff;
-            border-top: 1px solid #e0e0e0;
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            font-size: 0.85rem;
-            color: #757575;
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.2s;
-        }
-
-        .nav-item.active {
-            color: #3f51b5;
-            font-weight: bold;
-        }
-
-        .nav-icon {
-            font-size: 1.2rem;
-            margin-bottom: 2px;
-        }
-
-        /* 页面切换 */
-        .page {
-            display: none;
-            flex: 1;
-            flex-direction: column;
-            height: calc(100% - 56px);
-            width: 100%;
-            padding: 16px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .page.active {
-            display: flex;
-        }
-
-        .page-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #1a237e;
+        header {
             text-align: center;
-            padding-bottom: 12px;
-            border-bottom: 2px solid #e8eaf6;
-            margin-bottom: 12px;
-            flex-shrink: 0;
+            margin-bottom: 16px;
+            width: 100%;
+            max-width: 400px;
         }
-
-        /* 第一页：内容选择页 */
-        .select-container {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding-right: 4px;
-        }
-
-        .ebbinghaus-card {
-            background: #e8eaf6;
-            border: 1px solid #c5cae9;
-            border-radius: 12px;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .ebbinghaus-title {
-            font-size: 1rem;
-            font-weight: bold;
+        h1 {
+            font-size: 1.8rem;
             color: #1a237e;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            margin-bottom: 8px;
         }
-
-        .ebbinghaus-desc {
-            font-size: 0.8rem;
-            color: #5c6bc0;
-            line-height: 1.4;
-        }
-
-        .tree-container {
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 10px;
-        }
-
-        .book-header {
-            display: flex;
-            align-items: center;
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #2c3e50;
-            padding: 8px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .toggle-icon {
+        .mode-tag {
             display: inline-block;
-            width: 20px;
-            text-align: center;
-            margin-right: 6px;
-            font-size: 0.8rem;
-            color: #5c6bc0;
-        }
-
-        .chapter-item {
-            margin-left: 12px;
-            margin-bottom: 8px;
-            border-left: 2px solid #c5cae9;
-            padding-left: 10px;
-        }
-
-        .chapter-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: #3949ab;
-            cursor: pointer;
-            padding: 6px 0;
-        }
-
-        .paragraph-list {
-            margin-left: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-top: 4px;
-        }
-
-        .collapsed { display: none !important; }
-
-        .paragraph-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            font-size: 0.9rem;
-            color: #555;
-            cursor: pointer;
-            line-height: 1.4;
-            padding: 4px;
-            border-radius: 6px;
-        }
-
-        input[type="checkbox"] {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #7986cb;
-            border-radius: 50%;
-            outline: none;
-            cursor: pointer;
-            position: relative;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-
-        input[type="checkbox"]:checked {
-            background-color: #3f51b5;
-            border-color: #3f51b5;
-        }
-
-        input[type="checkbox"]:checked::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 5px;
-            width: 4px;
-            height: 8px;
-            border: solid white;
-            border-width: 0 2px 2px 0;
-            transform: rotate(45deg);
-        }
-
-        .button-bar {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-            flex-shrink: 0;
-        }
-
-        .btn {
-            flex: 1;
-            padding: 10px 12px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .btn-secondary { background-color: #e0e0e0; color: #424242; }
-        .btn-primary { background-color: #3f51b5; color: white; }
-        .btn-danger { background-color: #e53935; color: white; }
-        .btn-success { background-color: #43a047; color: white; }
-        .btn-warning { background-color: #ff9800; color: white; }
-
-        .btn-large {
-            height: 52px;
-            font-size: 1.1rem;
-            border-radius: 26px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-        }
-
-        /* 第二页：练习界面 */
-        .practice-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            gap: 12px;
-            position: relative;
-        }
-
-        .content-display {
-            flex: 1;
-            background-color: #f9fbe7;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            overflow-y: auto;
-            position: relative;
-        }
-
-        .wrong-mode-banner {
-            color: #e53935;
-            font-weight: bold;
-            font-size: 1.1rem;
-            margin-bottom: 6px;
-            display: none;
-        }
-
-        .chapter-tag {
             font-size: 0.85rem;
-            color: #827717;
-            background-color: #f0f4c3;
-            padding: 4px 10px;
-            border-radius: 10px;
+            font-weight: bold;
+            color: #f44336;
+            background-color: #ffebee;
+            border: 1px solid #ffcdd2;
+            padding: 2px 10px;
+            border-radius: 12px;
             margin-bottom: 8px;
-            font-weight: bold;
         }
-
-        /* 单字卡片样式 */
-        .single-char-card {
-            font-size: clamp(64px, 16vw, 100px);
-            font-weight: bold;
-            color: #1a237e; /* 默认深蓝色 */
-            background: #ffffff;
-            width: clamp(110px, 28vw, 160px);
-            height: clamp(110px, 28vw, 160px);
+        .stats {
+            font-size: 0.9rem;
+            color: #666;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border: 2px solid #c5cae9;
-            margin: 6px 0;
-            user-select: none;
-            transition: color 0.2s, border-color 0.2s;
-        }
-
-        /* 错题模式下，单字卡片字体变红 */
-        .single-char-card.is-wrong-mode {
-            color: #e53935;
-            border-color: #ef9a9a;
-        }
-
-        .context-mask-area {
-            width: 100%;
-            max-width: 95%;
-            margin-top: 10px;
-            padding: 12px;
-            background-color: #ffffff;
-            border-radius: 8px;
-            border: 1px dashed #7986cb;
-            text-align: center;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s;
-        }
-
-        .context-mask-tip {
-            font-size: 0.95rem;
-            color: #9e9e9e;
-            font-weight: bold;
-        }
-
-        .context-text {
-            font-size: 0.95rem;
-            color: #333;
-            line-height: 1.5;
-            text-align: left;
-            display: none;
-        }
-
-        .highlight-char { color: #e53935; font-weight: bold; font-size: 1.15em; text-decoration: underline; }
-
-        .controls-area {
-            display: flex;
-            flex-direction: column;
             gap: 12px;
-            flex-shrink: 0;
+            justify-content: center;
+            margin-bottom: 10px;
         }
-
-        .progress-bar-container {
+        /* 进度条样式 */
+        .progress-container {
             width: 100%;
             height: 8px;
             background-color: #e0e0e0;
             border-radius: 4px;
             overflow: hidden;
         }
-
-        .progress-bar-fill { height: 100%; width: 0%; background-color: #3f51b5; transition: width 0.3s; }
-
-        .stats-board {
-            display: flex;
-            justify-content: space-around;
-            background-color: #f5f5f5;
-            padding: 8px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: bold;
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4caf50;
+            transition: width 0.3s ease;
+        }
+        .progress-bar.error-mode {
+            background-color: #f44336;
         }
 
-        .stat-correct { color: #43a047; }
-        .stat-wrong { color: #e53935; }
-        .stat-total { color: #757575; }
-
-        /* 结算弹窗 */
-        .result-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .card-container {
+            width: 100%;
+            max-width: 400px;
+            height: 320px;
+            perspective: 1000px;
+            margin-bottom: 20px;
+            margin-top: 10px;
+        }
+        .card {
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.45);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            padding: 20px;
-        }
-
-        .result-card {
-            background: #ffffff;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
             border-radius: 16px;
-            padding: 24px 20px;
+        }
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            position: absolute;
             width: 100%;
-            max-width: 360px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 16px;
+            background: #ffffff;
             display: flex;
-            flex-direction: column;
-            gap: 16px;
-            animation: popIn 0.3s ease-out;
-        }
-
-        @keyframes popIn {
-            from { transform: scale(0.85); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        .result-card-title {
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-
-        .result-card.success .result-card-title { color: #2e7d32; }
-        .result-card.has-wrong .result-card-title { color: #c62828; }
-
-        .result-card-msg {
-            font-size: 1rem;
-            color: #424242;
-            line-height: 1.5;
-        }
-
-        .result-btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 8px;
-        }
-
-        /* 第三页：统计页样式 */
-        .stats-container {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            padding-right: 4px;
-        }
-
-        .section-card {
-            background: #fff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-        }
-
-        .section-title {
-            font-size: 1rem;
-            font-weight: bold;
-            color: #1a237e;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .date-group {
-            margin-bottom: 10px;
-            border: 1px solid #f0f0f0;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .date-header {
-            background-color: #f5f5f5;
-            padding: 8px 12px;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .date-content {
-            padding: 8px 12px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .history-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 1.05rem;
-            font-weight: 500;
-            background: #fafafa;
-            padding: 4px 8px;
-            border-radius: 6px;
-            border: 1px solid #eee;
-        }
-
-        .score-box {
-            display: inline-flex;
             flex-direction: column;
             justify-content: center;
-            font-size: 0.65rem;
-            line-height: 1.1;
-            height: 1.3em;
-        }
-
-        .score-correct { color: #43a047; }
-        .score-wrong { color: #e53935; }
-
-        .wrong-book-item {
-            display: inline-flex;
             align-items: center;
-            gap: 2px;
-            font-size: 1rem;
-            background-color: #ffebee;
-            padding: 2px 8px;
-            border-radius: 6px;
-            color: #c62828;
-        }
-
-        .wrong-count-badge {
-            font-size: 0.75rem;
-            color: #e53935;
-            font-weight: bold;
-        }
-
-        .stat-row-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .stat-row-item {
-            border: 1px solid #eee;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .stat-row-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background: #fafafa;
-            cursor: pointer;
-            font-size: 0.95rem;
-        }
-
-        .stat-char-badge {
-            font-size: 1.1rem;
-            font-weight: bold;
-            color: #1a237e;
-        }
-
-        .stat-detail-dates {
-            padding: 8px 12px;
-            background-color: #fff;
-            font-size: 0.8rem;
-            color: #666;
-            border-top: 1px dashed #eee;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-
-        .date-chip {
-            background-color: #f0f4c3;
-            color: #333;
-            padding: 2px 6px;
-            border-radius: 4px;
-        }
-
-        .btn-more {
-            width: 100%;
-            padding: 6px;
-            background-color: #f5f5f5;
-            border: 1px dashed #ccc;
-            border-radius: 6px;
-            color: #555;
-            font-size: 0.8rem;
-            cursor: pointer;
-            margin-top: 6px;
+            padding: 24px;
             text-align: center;
         }
+        .card-front {
+            border: 2px solid #3f51b5;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            background: #fafafa;
+            border: 2px solid #4caf50;
+        }
+        
+        /* 正确与错误计数样式 */
+        .card-score {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .score-correct { color: #4caf50; }
+        .score-wrong { color: #f44336; margin-left: 8px; }
 
-        .empty-tips {
+        .char {
+            font-size: 4.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+        .hint {
             font-size: 0.85rem;
             color: #999;
+        }
+        .context-sentence {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+        .highlight {
+            color: #e91e63;
+            font-weight: bold;
+            font-size: 1.4rem;
+            text-decoration: underline;
+        }
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            max-width: 400px;
+        }
+        button {
+            flex: 1;
+            padding: 14px 0;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-know {
+            background-color: #4caf50;
+            color: white;
+        }
+        .btn-know:hover { background-color: #43a047; }
+        .btn-forget {
+            background-color: #f44336;
+            color: white;
+        }
+        .btn-forget:hover { background-color: #e53935; }
+        .btn-restart {
+            background-color: #3f51b5;
+            color: white;
+            margin-top: 16px;
+        }
+        .btn-restart:hover { background-color: #303f9f; }
+        .finish-container {
             text-align: center;
-            padding: 12px 0;
+            margin-top: 60px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .finish-container h2 {
+            color: #2c3e50;
+            margin-bottom: 12px;
+        }
+        .loading {
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: 100px;
         }
     </style>
 </head>
 <body>
 
-    <div class="app-card">
-        <!-- 第一页：内容选择 -->
-        <div id="page-select" class="page active">
-            <div class="page-title">抽卡认字 - 内容选择</div>
-            
-            <div class="select-container">
-                <div class="ebbinghaus-card">
-                    <div class="ebbinghaus-title">
-                        <span>艾宾浩斯错字复习</span>
-                        <span id="ebbinghaus-count" style="font-size: 0.9rem; color: #e53935;">待复习: 0 字</span>
-                    </div>
-                    <div class="ebbinghaus-desc">根据 1、2、4、7、15、30 天遗忘曲线，为你自动筛选今天需要复习的错字。</div>
-                    <button class="btn btn-warning" onclick="startEbbinghausPractice()" style="margin-top: 6px;">开始艾宾浩斯复习</button>
-                </div>
-
-                <div id="tree-container" class="tree-container">
-                    <div style="text-align: center; color: #666; margin-top: 10px;">正在加载《论语》...</div>
-                </div>
-            </div>
-
-            <div class="button-bar">
-                <button class="btn btn-secondary" onclick="resetSelection()">重置勾选</button>
-                <button class="btn btn-primary" onclick="startPractice()">开始自选练习</button>
-            </div>
+    <header>
+        <h1>抽卡认字</h1>
+        <div id="mode-tag-container"></div>
+        <div class="stats">
+            <span>总字数: <strong id="total-count">0</strong></span>
+            <span>待学习: <strong id="review-count">0</strong></span>
         </div>
-
-        <!-- 第二页：练习 -->
-        <div id="page-practice" class="page">
-            <div class="practice-container">
-                <div class="content-display">
-                    <div id="wrong-mode-banner" class="wrong-mode-banner">错题练习 1/1</div>
-                    <div id="display-chapter" class="chapter-tag">章节名称</div>
-                    <div id="display-char-card" class="single-char-card">字</div>
-                    
-                    <div class="context-mask-area" onclick="toggleContextMask()">
-                        <div id="context-tip" class="context-mask-tip">点击查看出处</div>
-                        <div id="display-context" class="context-text"></div>
-                    </div>
-                </div>
-
-                <div class="controls-area">
-                    <div class="progress-bar-container">
-                        <div id="progress-fill" class="progress-bar-fill"></div>
-                    </div>
-
-                    <div class="stats-board">
-                        <div>正确: <span id="stat-correct" class="stat-correct">0</span></div>
-                        <div>错误: <span id="stat-wrong" class="stat-wrong">0</span></div>
-                        <div>剩余卡片: <span id="stat-remaining" class="stat-total">0</span></div>
-                    </div>
-
-                    <div class="action-row" style="display:flex; gap:16px;">
-                        <button class="btn btn-success btn-large" onclick="recordAnswer(true)">认识 (✓)</button>
-                        <button class="btn btn-danger btn-large" onclick="recordAnswer(false)">不认识 (✕)</button>
-                    </div>
-                </div>
-
-                <!-- 结算卡片弹窗 -->
-                <div id="result-overlay" class="result-overlay">
-                    <div id="result-card" class="result-card">
-                        <div id="result-title" class="result-card-title">练习完成</div>
-                        <div id="result-msg" class="result-card-msg"></div>
-                        <div class="result-btn-group">
-                            <button class="btn btn-primary" onclick="retryLastPractice()">再练一次</button>
-                            <button class="btn btn-secondary" onclick="goToContentSelect()">选择内容</button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
         </div>
+    </header>
 
-        <!-- 第三页：统计 -->
-        <div id="page-stats" class="page">
-            <div class="page-title">学习数据统计</div>
-            <div class="stats-container">
-                <div class="section-card">
-                    <div class="section-title">学习历程</div>
-                    <div id="history-container"></div>
-                    <button id="btn-history-more" class="btn-more" onclick="showAllHistory()" style="display:none;">查看更多日期</button>
-                </div>
-
-                <div class="section-card">
-                    <div class="section-title">错题本</div>
-                    <div id="wrong-book-container"></div>
-                    <button id="btn-wrong-more" class="btn-more" onclick="showAllWrongBook()" style="display:none;">查看更多日期</button>
-                </div>
-
-                <div class="section-card">
-                    <div class="section-title">错字统计（按错误频次）</div>
-                    <div id="stat-char-container" class="stat-row-list"></div>
-                    <button id="btn-stat-more" class="btn-more" onclick="showAllStatChars()" style="display:none;">查看更多高频错字</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- 底部导航栏 -->
-        <div class="nav-bar">
-            <div id="nav-select" class="nav-item active" onclick="switchNav('select')">
-                <div class="nav-icon">📚</div>
-                <div>内容选择</div>
-            </div>
-            <div id="nav-practice" class="nav-item" onclick="switchNav('practice')">
-                <div class="nav-icon">🎴</div>
-                <div>练习</div>
-            </div>
-            <div id="nav-stats" class="nav-item" onclick="switchNav('stats')">
-                <div class="nav-icon">📊</div>
-                <div>统计</div>
-            </div>
-        </div>
-    </div>
+    <div id="app" class="loading">正在加载文本数据...</div>
 
     <script>
-        let parsedData = { book: "论语", chapters: [] };
-        let initialCardsQueue = []; 
-        let charCardsQueue = [];    
-        let currentIndex = 0;
-        let stats = { correct: 0, wrong: 0 };
-        let currentSessionDetails = {};
-        let isContextRevealed = false;
+        let allCards = [];         // 完整卡片数据备份
+        let currentQueue = [];     // 当前轮次的卡片队列
+        let wrongQueue = [];       // 本轮记录的错字队列（去重）
+        let isErrorMode = false;   // 是否处于错字重练模式
+        let totalInCurrentRound = 0; // 当前轮初始卡片数
 
-        let isWrongMode = false;
-        let wrongTotalCount = 0;
-
-        let showAllHistoryDates = false;
-        let showAllWrongDates = false;
-        let showAllStatRows = false;
-
-        document.addEventListener("DOMContentLoaded", () => {
-            fetchLunyuText();
-            updateEbbinghausCount();
-        });
-
-        function switchNav(target) {
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
-
-            document.getElementById(`nav-${target}`).classList.add('active');
-            document.getElementById(`page-${target}`).classList.add('active');
-
-            if (target === 'stats') {
-                renderStatisticsPage();
-            } else if (target === 'select') {
-                updateEbbinghausCount();
-            }
-        }
-
-        async function fetchLunyuText() {
-            const container = document.getElementById('tree-container');
+        // 初始化加载数据
+        async function init() {
             try {
-                const response = await fetch(`lunyu.txt?v=${new Date().getTime()}`);
-                if (!response.ok) throw new Error(`状态码: ${response.status}`);
+                const response = await fetch('./lunyu.txt');
+                if (!response.ok) throw new Error('无法读取文本文件');
                 const text = await response.text();
-                parseLunyuFormat(text);
-                renderSelectionTree();
+                
+                processText(text);
+                if (allCards.length === 0) {
+                    document.getElementById('app').innerHTML = '文本解析为空，请检查文件。';
+                    return;
+                }
+                
+                startNewPractice();
             } catch (err) {
-                container.innerHTML = `<div style="color:#e53935; text-align:center;">读取 lunyu.txt 失败！请确保文件存在。</div>`;
+                console.error(err);
+                document.getElementById('app').innerHTML = '加载失败，请确保本地已放置 lunyu.txt。';
             }
         }
 
-        function parseLunyuFormat(rawText) {
-            const bookMatch = rawText.match(/<book>(.*?)<\/book>/s);
-            if (bookMatch) parsedData.book = bookMatch[1].trim();
+        // 解析文本
+        function processText(text) {
+            const rawSentences = text.split(/[。！？；\n\r]/);
+            const cleanSentences = rawSentences
+                .map(s => s.trim().replace(/[^\u4e00-\u9fa5]/g, ''))
+                .filter(s => s.length > 0);
 
-            const contentMatch = rawText.match(/<content>([\s\S]*?)<\/content>/s);
-            const contentText = contentMatch ? contentMatch[1] : rawText;
+            const cardMap = new Map();
 
-            const lines = contentText.split('\n');
-            let currentChapter = null;
-
-            lines.forEach(line => {
-                const trimmed = line.trim();
-                if (!trimmed) return;
-                if (/^[\u4e00-\u9fa5]+第[一二三四五六七八九十]+$/.test(trimmed)) {
-                    currentChapter = { title: trimmed, paragraphs: [] };
-                    parsedData.chapters.push(currentChapter);
-                } else if (currentChapter) {
-                    currentChapter.paragraphs.push(trimmed);
-                }
-            });
-        }
-
-        function renderSelectionTree() {
-            const container = document.getElementById('tree-container');
-            container.innerHTML = '';
-
-            const bookDiv = document.createElement('div');
-            
-            const bookHeader = document.createElement('div');
-            bookHeader.className = 'book-header';
-            bookHeader.innerHTML = `<span class="toggle-icon" id="book-icon">▶</span><span>《${parsedData.book}》</span>`;
-            
-            const chapterList = document.createElement('div');
-            chapterList.className = 'collapsed';
-
-            bookHeader.onclick = () => {
-                const isCollapsed = chapterList.classList.toggle('collapsed');
-                document.getElementById('book-icon').textContent = isCollapsed ? '▶' : '▼';
-            };
-
-            bookDiv.appendChild(bookHeader);
-
-            parsedData.chapters.forEach((chap, cIdx) => {
-                const chapDiv = document.createElement('div');
-                chapDiv.className = 'chapter-item';
-
-                const chapHeader = document.createElement('div');
-                chapHeader.className = 'chapter-header';
-
-                const toggleIcon = document.createElement('span');
-                toggleIcon.className = 'toggle-icon';
-                toggleIcon.textContent = '▼';
-
-                const chapCheckbox = document.createElement('input');
-                chapCheckbox.type = 'checkbox';
-                chapCheckbox.id = `chap-${cIdx}`;
-                chapCheckbox.onclick = (e) => e.stopPropagation();
-                chapCheckbox.onchange = (e) => toggleChapter(cIdx, e.target.checked);
-
-                const chapLabel = document.createElement('span');
-                chapLabel.textContent = chap.title;
-
-                chapHeader.appendChild(toggleIcon);
-                chapHeader.appendChild(chapCheckbox);
-                chapHeader.appendChild(chapLabel);
-
-                const paraList = document.createElement('div');
-                paraList.className = 'paragraph-list';
-
-                chapHeader.onclick = (e) => {
-                    if (e.target === chapCheckbox) return;
-                    const isCollapsed = paraList.classList.toggle('collapsed');
-                    toggleIcon.textContent = isCollapsed ? '▶' : '▼';
-                };
-
-                chap.paragraphs.forEach((para, pIdx) => {
-                    const paraItem = document.createElement('div');
-                    paraItem.className = 'paragraph-item';
-
-                    const paraCheckbox = document.createElement('input');
-                    paraCheckbox.type = 'checkbox';
-                    paraCheckbox.id = `para-${cIdx}-${pIdx}`;
-                    paraCheckbox.className = `p-check-${cIdx}`;
-                    paraCheckbox.dataset.chapIndex = cIdx;
-                    paraCheckbox.dataset.paraIndex = pIdx;
-                    paraCheckbox.onchange = () => updateChapterCheckbox(cIdx);
-
-                    const paraLabel = document.createElement('label');
-                    paraLabel.htmlFor = `para-${cIdx}-${pIdx}`;
-                    const shortText = para.length > 20 ? para.substring(0, 20) + '...' : para;
-                    paraLabel.textContent = `${pIdx + 1}. ${shortText}`;
-
-                    paraItem.appendChild(paraCheckbox);
-                    paraItem.appendChild(paraLabel);
-                    paraList.appendChild(paraItem);
-                });
-
-                chapDiv.appendChild(chapHeader);
-                chapDiv.appendChild(paraList);
-                chapterList.appendChild(chapDiv);
-            });
-
-            bookDiv.appendChild(chapterList);
-            container.appendChild(bookDiv);
-        }
-
-        function toggleChapter(cIdx, isChecked) {
-            document.querySelectorAll(`.p-check-${cIdx}`).forEach(cb => cb.checked = isChecked);
-        }
-
-        function updateChapterCheckbox(cIdx) {
-            const chapCb = document.getElementById(`chap-${cIdx}`);
-            const checkboxes = Array.from(document.querySelectorAll(`.p-check-${cIdx}`));
-            chapCb.checked = checkboxes.every(cb => cb.checked);
-        }
-
-        function resetSelection() {
-            document.querySelectorAll('#tree-container input[type="checkbox"]').forEach(cb => cb.checked = false);
-        }
-
-        function getEbbinghausWrongChars() {
-            const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
-            const todayStr = getTodayDateStr();
-            const todayDate = new Date(todayStr);
-
-            const intervals = [1, 2, 4, 7, 15, 30]; 
-            let targetCharSet = new Set();
-
-            for (let dateStr in historyData) {
-                const recordDate = new Date(dateStr);
-                const diffTime = Math.abs(todayDate - recordDate);
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                if (intervals.includes(diffDays)) {
-                    for (let char in historyData[dateStr]) {
-                        if (historyData[dateStr][char].wrong > 0) {
-                            targetCharSet.add(char);
-                        }
-                    }
-                }
-            }
-
-            return Array.from(targetCharSet);
-        }
-
-        function updateEbbinghausCount() {
-            const wrongChars = getEbbinghausWrongChars();
-            document.getElementById('ebbinghaus-count').textContent = `待复习: ${wrongChars.length} 字`;
-        }
-
-        function startEbbinghausPractice() {
-            const wrongChars = getEbbinghausWrongChars();
-            if (wrongChars.length === 0) {
-                alert('今天暂无符合艾宾浩斯复习节点的错字！去自选章节练习吧~');
-                return;
-            }
-
-            let cards = [];
-            const chineseCharRegex = /[\u4e00-\u9fa5]/;
-
-            parsedData.chapters.forEach(chap => {
-                chap.paragraphs.forEach(text => {
-                    for (let i = 0; i < text.length; i++) {
-                        const c = text[i];
-                        if (wrongChars.includes(c) && chineseCharRegex.test(c)) {
-                            cards.push({
-                                char: c,
-                                chapterTitle: chap.title,
-                                fullText: text,
-                                charIndex: i
-                            });
-                        }
-                    }
-                });
-            });
-
-            startQueuePractice(cards, false);
-        }
-
-        function startPractice() {
-            let cards = [];
-            const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
-            const chineseCharRegex = /[\u4e00-\u9fa5]/;
-
-            checkboxes.forEach(cb => {
-                if (cb.checked) {
-                    const cIdx = cb.dataset.chapIndex;
-                    const pIdx = cb.dataset.paraIndex;
-                    const chapterTitle = parsedData.chapters[cIdx].title;
-                    const text = parsedData.chapters[cIdx].paragraphs[pIdx];
-
-                    for (let i = 0; i < text.length; i++) {
-                        if (chineseCharRegex.test(text[i])) {
-                            cards.push({
-                                char: text[i],
-                                chapterTitle: chapterTitle,
-                                fullText: text,
-                                charIndex: i
-                            });
+            cleanSentences.forEach(sentence => {
+                for (let char of sentence) {
+                    if (!cardMap.has(char)) {
+                        cardMap.set(char, {
+                            char: char,
+                            sentences: [sentence],
+                            correctCount: 0,
+                            wrongCount: 0
+                        });
+                    } else {
+                        const data = cardMap.get(char);
+                        if (data.sentences.length < 3 && !data.sentences.includes(sentence)) {
+                            data.sentences.push(sentence);
                         }
                     }
                 }
             });
 
-            if (cards.length === 0) {
-                alert('请至少勾选一个包含汉字的段落！');
-                return;
-            }
-
-            startQueuePractice(cards, false);
+            allCards = Array.from(cardMap.values());
         }
 
-        function startQueuePractice(cards, isWrongLoop = false, totalWrong = 0) {
-            document.getElementById('result-overlay').style.display = 'none';
+        // 重新开启一次练习（与上一次练习结果无关）
+        function startNewPractice() {
+            // 重置所有卡片的答题数据
+            allCards.forEach(card => {
+                card.correctCount = 0;
+                card.wrongCount = 0;
+            });
 
-            isWrongMode = isWrongLoop;
-            wrongTotalCount = totalWrong;
+            // 洗牌
+            currentQueue = [...allCards];
+            shuffle(currentQueue);
 
-            initialCardsQueue = [...cards];
-            charCardsQueue = [...cards];
+            wrongQueue = [];
+            isErrorMode = false;
+            totalInCurrentRound = currentQueue.length;
 
-            for (let i = charCardsQueue.length - 1; i > 0; i--) {
+            renderCardUI();
+            updateHeader();
+            showNextCard();
+        }
+
+        // 进入错字重练模式
+        function startErrorPractice() {
+            currentQueue = [...wrongQueue];
+            shuffle(currentQueue);
+            wrongQueue = [];
+            isErrorMode = true;
+            totalInCurrentRound = currentQueue.length;
+
+            renderCardUI();
+            updateHeader();
+            showNextCard();
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [charCardsQueue[i], charCardsQueue[j]] = [charCardsQueue[j], charCardsQueue[i]];
-            }
-
-            currentIndex = 0;
-            stats = { correct: 0, wrong: 0 };
-            currentSessionDetails = {};
-
-            switchNav('practice');
-            renderCurrentQuestion();
-        }
-
-        function renderCurrentQuestion() {
-            if (currentIndex >= charCardsQueue.length) {
-                savePracticeSession();
-                showPracticeResultModal();
-                return;
-            }
-
-            resetContextMask();
-            const card = charCardsQueue[currentIndex];
-
-            const wrongBanner = document.getElementById('wrong-mode-banner');
-            const charCardEl = document.getElementById('display-char-card');
-
-            // 根据是否是错题重练模式切换 UI 样式（包含字卡颜色）
-            if (isWrongMode) {
-                wrongBanner.style.display = 'block';
-                wrongBanner.textContent = `错题练习 ${currentIndex + 1}/${wrongTotalCount}`;
-                charCardEl.classList.add('is-wrong-mode'); // 字体显示红色的 CSS 类
-            } else {
-                wrongBanner.style.display = 'none';
-                charCardEl.classList.remove('is-wrong-mode');
-            }
-
-            document.getElementById('display-chapter').textContent = card.chapterTitle;
-            charCardEl.textContent = card.char;
-
-            const before = card.fullText.substring(0, card.charIndex);
-            const after = card.fullText.substring(card.charIndex + 1);
-            document.getElementById('display-context').innerHTML = 
-                `${escapeHtml(before)}<span class="highlight-char">${escapeHtml(card.char)}</span>${escapeHtml(after)}`;
-
-            const total = charCardsQueue.length;
-            const progress = (currentIndex / total) * 100;
-            document.getElementById('progress-fill').style.width = `${progress}%`;
-
-            document.getElementById('stat-correct').textContent = stats.correct;
-            document.getElementById('stat-wrong').textContent = stats.wrong;
-            document.getElementById('stat-remaining').textContent = total - currentIndex;
-        }
-
-        function toggleContextMask() {
-            const tipEl = document.getElementById('context-tip');
-            const contextEl = document.getElementById('display-context');
-
-            isContextRevealed = !isContextRevealed;
-
-            if (isContextRevealed) {
-                tipEl.style.display = 'none';
-                contextEl.style.display = 'block';
-            } else {
-                tipEl.style.display = 'block';
-                contextEl.style.display = 'none';
+                [array[i], array[j]] = [array[j], array[i]];
             }
         }
 
-        function resetContextMask() {
-            isContextRevealed = false;
-            document.getElementById('context-tip').style.display = 'block';
-            document.getElementById('display-context').style.display = 'none';
-        }
-
-        function recordAnswer(isCorrect) {
-            const card = charCardsQueue[currentIndex];
-            const char = card.char;
-
-            if (!currentSessionDetails[char]) {
-                currentSessionDetails[char] = { correct: 0, wrong: 0, cardRef: card };
-            }
-
-            if (isCorrect) {
-                stats.correct++;
-                currentSessionDetails[char].correct++;
-            } else {
-                stats.wrong++;
-                currentSessionDetails[char].wrong++;
-            }
-            nextQuestion();
-        }
-
-        function nextQuestion() {
-            currentIndex++;
-            renderCurrentQuestion();
-        }
-
-        function showPracticeResultModal() {
-            const overlay = document.getElementById('result-overlay');
-            const card = document.getElementById('result-card');
-            const titleEl = document.getElementById('result-title');
-            const msgEl = document.getElementById('result-msg');
-
-            const totalCount = charCardsQueue.length;
-            const wrongCount = stats.wrong;
-
-            if (wrongCount === 0) {
-                card.className = 'result-card success';
-                titleEl.textContent = ' 🎉 太棒了！';
-                msgEl.textContent = `本次全部答对 ${totalCount} 字，完全掌握！`;
-            } else {
-                card.className = 'result-card has-wrong';
-                titleEl.textContent = '💪 继续加油！';
-                msgEl.textContent = `正确：${stats.correct}，错误：${wrongCount}，有 ${wrongCount} 个错题哦，加强练习吧。`;
-            }
-
-            overlay.style.display = 'flex';
-        }
-
-        function retryLastPractice() {
-            let wrongCards = [];
-            for (let char in currentSessionDetails) {
-                if (currentSessionDetails[char].wrong > 0) {
-                    wrongCards.push(currentSessionDetails[char].cardRef);
-                }
-            }
-
-            if (wrongCards.length > 0) {
-                startQueuePractice(wrongCards, true, wrongCards.length);
-            } else {
-                startQueuePractice(initialCardsQueue, false);
-            }
-        }
-
-        function goToContentSelect() {
-            document.getElementById('result-overlay').style.display = 'none';
-            switchNav('select');
-        }
-
-        function savePracticeSession() {
-            if (Object.keys(currentSessionDetails).length === 0) return;
-
-            const today = getTodayDateStr();
-            let historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
-
-            if (!historyData[today]) {
-                historyData[today] = {};
-            }
-
-            for (let char in currentSessionDetails) {
-                if (!historyData[today][char]) {
-                    historyData[today][char] = { correct: 0, wrong: 0 };
-                }
-                historyData[today][char].correct += currentSessionDetails[char].correct;
-                historyData[today][char].wrong += currentSessionDetails[char].wrong;
-            }
-
-            localStorage.setItem('lunyu_history_data', JSON.stringify(historyData));
-        }
-
-        function getTodayDateStr() {
-            const d = new Date();
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        function renderStatisticsPage() {
-            const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
-            const dates = Object.keys(historyData).sort().reverse();
-
-            renderLearningHistory(historyData, dates);
-            renderWrongBook(historyData, dates);
-            renderStatChars(historyData);
-        }
-
-        function renderLearningHistory(historyData, dates) {
-            const container = document.getElementById('history-container');
-            const moreBtn = document.getElementById('btn-history-more');
-            container.innerHTML = '';
-
-            if (dates.length === 0) {
-                container.innerHTML = '<div class="empty-tips">暂无学习记录</div>';
-                moreBtn.style.display = 'none';
-                return;
-            }
-
-            const today = getTodayDateStr();
-            const displayDates = showAllHistoryDates ? dates : dates.slice(0, 5);
-
-            displayDates.forEach(date => {
-                const group = document.createElement('div');
-                group.className = 'date-group';
-
-                const isToday = (date === today);
-                
-                const header = document.createElement('div');
-                header.className = 'date-header';
-                header.innerHTML = `<span>${date} ${isToday ? '(今天)' : ''}</span><span id="hist-icon-${date}">${isToday ? '▲' : '▼'}</span>`;
-
-                const content = document.createElement('div');
-                content.className = `date-content ${isToday ? '' : 'collapsed'}`;
-                content.id = `hist-content-${date}`;
-
-                header.onclick = () => {
-                    const isCollapsed = content.classList.toggle('collapsed');
-                    document.getElementById(`hist-icon-${date}`).textContent = isCollapsed ? '▼' : '▲';
-                };
-
-                const charObj = historyData[date];
-                for (let char in charObj) {
-                    const n = charObj[char].correct;
-                    const m = charObj[char].wrong;
-
-                    const item = document.createElement('div');
-                    item.className = 'history-item';
-                    item.innerHTML = `
-                        <span>${char}</span>
-                        <div class="score-box">
-                            <span class="score-correct">✓ ${n}</span>
-                            <span class="score-wrong">✕ ${m}</span>
+        // 渲染卡片界面结构（认识在左，不认识在右）
+        function renderCardUI() {
+            const app = document.getElementById('app');
+            app.className = '';
+            app.innerHTML = `
+                <div class="card-container">
+                    <div class="card" id="card" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <div class="card-score" id="score-front">正确: 0 错误: 0</div>
+                            <div class="char" id="card-char">-</div>
+                            <div class="hint">点击卡片翻面查看释义与例句</div>
                         </div>
-                    `;
-                    content.appendChild(item);
+                        <div class="card-face card-back">
+                            <div class="card-score" id="score-back">正确: 0 错误: 0</div>
+                            <div class="context-sentence" id="card-sentence"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-group">
+                    <button class="btn-know" onclick="handleResult(true)">认识</button>
+                    <button class="btn-forget" onclick="handleResult(false)">不认识</button>
+                </div>
+            `;
+        }
+
+        function flipCard() {
+            const card = document.getElementById('card');
+            card.classList.toggle('flipped');
+        }
+
+        // 刷新顶部统计和进度条
+        function updateHeader() {
+            const tagContainer = document.getElementById('mode-tag-container');
+            const progressBar = document.getElementById('progress-bar');
+            
+            if (isErrorMode) {
+                tagContainer.innerHTML = `<span class="mode-tag">错字重练</span>`;
+                progressBar.classList.add('error-mode');
+            } else {
+                tagContainer.innerHTML = '';
+                progressBar.classList.remove('error-mode');
+            }
+
+            document.getElementById('total-count').textContent = totalInCurrentRound;
+            document.getElementById('review-count').textContent = currentQueue.length;
+
+            // 计算进度百分比
+            const completed = totalInCurrentRound - currentQueue.length;
+            const progress = totalInCurrentRound > 0 ? (completed / totalInCurrentRound) * 100 : 0;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // 显示下一张卡片
+        function showNextCard() {
+            if (currentQueue.length === 0) {
+                // 本轮结束，判断是否有错题
+                if (wrongQueue.length > 0) {
+                    startErrorPractice();
+                } else {
+                    showFinishUI();
                 }
-
-                group.appendChild(header);
-                group.appendChild(content);
-                container.appendChild(group);
-            });
-
-            moreBtn.style.display = dates.length > 5 && !showAllHistoryDates ? 'block' : 'none';
-        }
-
-        function showAllHistory() {
-            showAllHistoryDates = true;
-            renderStatisticsPage();
-        }
-
-        function renderWrongBook(historyData, dates) {
-            const container = document.getElementById('wrong-book-container');
-            const moreBtn = document.getElementById('btn-wrong-more');
-            container.innerHTML = '';
-
-            const wrongDates = dates.filter(date => {
-                const charObj = historyData[date];
-                return Object.keys(charObj).some(c => charObj[c].wrong > 0);
-            });
-
-            if (wrongDates.length === 0) {
-                container.innerHTML = '<div class="empty-tips">暂无错字记录</div>';
-                moreBtn.style.display = 'none';
                 return;
             }
 
-            const today = getTodayDateStr();
-            const displayDates = showAllWrongDates ? wrongDates : wrongDates.slice(0, 5);
+            const currentCard = currentQueue[0];
+            const cardEl = document.getElementById('card');
+            
+            cardEl.classList.remove('flipped');
 
-            displayDates.forEach(date => {
-                const group = document.createElement('div');
-                group.className = 'date-group';
+            setTimeout(() => {
+                // 第一行显示正确/错误次数
+                const scoreText = `<span class="score-correct">正确: ${currentCard.correctCount}</span><span class="score-wrong">错误: ${currentCard.wrongCount}</span>`;
+                document.getElementById('score-front').innerHTML = scoreText;
+                document.getElementById('score-back').innerHTML = scoreText;
 
-                const isToday = (date === today);
-
-                const header = document.createElement('div');
-                header.className = 'date-header';
-                header.innerHTML = `<span>${date} ${isToday ? '(今天)' : ''}</span><span id="wrong-icon-${date}">${isToday ? '▲' : '▼'}</span>`;
-
-                const content = document.createElement('div');
-                content.className = `date-content ${isToday ? '' : 'collapsed'}`;
-                content.id = `wrong-content-${date}`;
-
-                header.onclick = () => {
-                    const isCollapsed = content.classList.toggle('collapsed');
-                    document.getElementById(`wrong-icon-${date}`).textContent = isCollapsed ? '▼' : '▲';
-                };
-
-                const charObj = historyData[date];
-                for (let char in charObj) {
-                    const m = charObj[char].wrong;
-                    if (m > 0) {
-                        const item = document.createElement('div');
-                        item.className = 'wrong-book-item';
-                        item.innerHTML = `<span>${char}</span><span class="wrong-count-badge">${m}</span>`;
-                        content.appendChild(item);
-                    }
-                }
-
-                group.appendChild(header);
-                group.appendChild(content);
-                container.appendChild(group);
-            });
-
-            moreBtn.style.display = wrongDates.length > 5 && !showAllWrongDates ? 'block' : 'none';
-        }
-
-        function showAllWrongBook() {
-            showAllWrongDates = true;
-            renderStatisticsPage();
-        }
-
-        function renderStatChars(historyData) {
-            const container = document.getElementById('stat-char-container');
-            const moreBtn = document.getElementById('btn-stat-more');
-            container.innerHTML = '';
-
-            let wrongCharMap = {};
-
-            for (let date in historyData) {
-                for (let char in historyData[date]) {
-                    const wrong = historyData[date][char].wrong;
-                    if (wrong > 0) {
-                        if (!wrongCharMap[char]) {
-                            wrongCharMap[char] = { totalWrong: 0, dates: [] };
-                        }
-                        wrongCharMap[char].totalWrong += wrong;
-                        wrongCharMap[char].dates.push(`${date} (${wrong}次)`);
-                    }
-                }
-            }
-
-            let sortedWrongList = Object.keys(wrongCharMap).map(char => {
-                return {
-                    char: char,
-                    totalWrong: wrongCharMap[char].totalWrong,
-                    dates: wrongCharMap[char].dates
-                };
-            }).sort((a, b) => b.totalWrong - a.totalWrong);
-
-            if (sortedWrongList.length === 0) {
-                container.innerHTML = '<div class="empty-tips">太棒了，目前没有错字统计！</div>';
-                moreBtn.style.display = 'none';
-                return;
-            }
-
-            const displayRows = showAllStatRows ? sortedWrongList : sortedWrongList.slice(0, 5);
-
-            displayRows.forEach((item, idx) => {
-                const rowItem = document.createElement('div');
-                rowItem.className = 'stat-row-item';
-
-                const header = document.createElement('div');
-                header.className = 'stat-row-header';
-                header.innerHTML = `
-                    <div><span style="color:#999; margin-right:8px;">${idx + 1}</span><span class="stat-char-badge">${item.char}</span></div>
-                    <div style="font-size:0.85rem; color:#e53935; font-weight:bold;">错误 ${item.totalWrong} 次 <span style="font-size:0.75rem; color:#999;">▼</span></div>
-                `;
-
-                const detail = document.createElement('div');
-                detail.className = 'stat-detail-dates collapsed';
+                document.getElementById('card-char').textContent = currentCard.char;
                 
-                let dateChips = item.dates.map(d => `<span class="date-chip">${d}</span>`).join('');
-                detail.innerHTML = `<div>错误发生日期：</div>${dateChips}`;
+                const rawSentence = currentCard.sentences[0] || '';
+                const highlightedSentence = rawSentence.replace(
+                    new RegExp(currentCard.char, 'g'),
+                    `<span class="highlight">${currentCard.char}</span>`
+                );
+                document.getElementById('card-sentence').innerHTML = `“${highlightedSentence}”`;
+            }, cardEl.classList.contains('flipped') ? 300 : 0);
 
-                header.onclick = () => {
-                    detail.classList.toggle('collapsed');
-                };
+            updateHeader();
+        }
 
-                rowItem.appendChild(header);
-                rowItem.appendChild(detail);
-                container.appendChild(rowItem);
+        // 答题逻辑
+        function handleResult(known) {
+            if (currentQueue.length === 0) return;
+
+            const currentCard = currentQueue[0];
+
+            if (known) {
+                currentCard.correctCount++;
+                currentQueue.shift(); // 移出当前队列
+            } else {
+                currentCard.wrongCount++;
+                // 放入错题集合
+                if (!wrongQueue.includes(currentCard)) {
+                    wrongQueue.push(currentCard);
+                }
+                // 不认识时将卡片移到队列末尾继续练习
+                const item = currentQueue.shift();
+                currentQueue.push(item);
+            }
+
+            showNextCard();
+        }
+
+        // 完成所有练习页面
+        function showFinishUI() {
+            document.getElementById('mode-tag-container').innerHTML = '';
+            document.getElementById('progress-bar').style.width = '100%';
+            document.getElementById('review-count').textContent = '0';
+
+            const app = document.getElementById('app');
+            app.innerHTML = `
+                <div class="finish-container">
+                    <h2>🎉 恭喜！已通关所有汉字</h2>
+                    <button class="btn-restart" onclick="startNewPractice()">再练一次</button>
+                </div>
+            `;
+        }
+
+        init();
+
+        // Service Worker 自动注册与后台更新
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    registration.onupdatefound = () => {
+                        const installingWorker = registration.installing;
+                        if (installingWorker == null) return;
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                window.location.reload();
+                            }
+                        };
+                    };
+                }).catch((err) => console.error('SW Failed:', err));
             });
 
-            moreBtn.style.display = sortedWrongList.length > 5 && !showAllStatRows ? 'block' : 'none';
-        }
-
-        function showAllStatChars() {
-            showAllStatRows = true;
-            renderStatisticsPage();
-        }
-
-        function escapeHtml(text) {
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (!refreshing) {
+                    refreshing = true;
+                    window.location.reload();
+                }
+            });
         }
     </script>
 </body>
