@@ -22,7 +22,7 @@
             color: #333;
         }
 
-        /* 主容器：自适应桌面与移动端 */
+        /* 主容器 */
         .app-card {
             width: 100%;
             max-width: 900px;
@@ -37,7 +37,7 @@
             position: relative;
         }
 
-        /* 页面切换控制 */
+        /* 页面切换 */
         .page {
             display: none;
             flex: 1;
@@ -71,12 +71,14 @@
             margin-bottom: 16px;
         }
 
-        /* 树形层级 */
+        /* 可折叠层级样式 */
         .book-item {
             margin-bottom: 12px;
         }
 
-        .book-title {
+        .book-header {
+            display: flex;
+            align-items: center;
             font-size: 1.2rem;
             font-weight: bold;
             color: #2c3e50;
@@ -84,6 +86,22 @@
             background-color: #e8eaf6;
             border-radius: 8px;
             margin-bottom: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-icon {
+            display: inline-block;
+            width: 20px;
+            text-align: center;
+            margin-right: 6px;
+            font-size: 0.8rem;
+            transition: transform 0.2s ease;
+            color: #5c6bc0;
+        }
+
+        .chapter-list {
+            display: block;
         }
 
         .chapter-item {
@@ -102,6 +120,7 @@
             color: #3949ab;
             cursor: pointer;
             padding: 6px 0;
+            user-select: none;
         }
 
         .paragraph-list {
@@ -110,6 +129,11 @@
             flex-direction: column;
             gap: 6px;
             margin-top: 4px;
+        }
+
+        /* 折叠隐藏类 */
+        .collapsed {
+            display: none !important;
         }
 
         .paragraph-item {
@@ -129,7 +153,7 @@
             background-color: #f5f5f5;
         }
 
-        /* 圆形复选框样式 */
+        /* 复选框样式 */
         input[type="checkbox"] {
             appearance: none;
             -webkit-appearance: none;
@@ -162,21 +186,23 @@
             transform: rotate(45deg);
         }
 
-        /* 按钮底栏 */
+        /* 底栏与按钮 */
         .button-bar {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             justify-content: center;
             padding-top: 12px;
             border-top: 1px solid #eee;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .btn {
             flex: 1;
-            max-width: 200px;
-            padding: 12px 20px;
-            font-size: 1rem;
+            min-width: 120px;
+            max-width: 180px;
+            padding: 10px 16px;
+            font-size: 0.95rem;
             font-weight: bold;
             border: none;
             border-radius: 25px;
@@ -222,7 +248,16 @@
             background-color: #2e7d32;
         }
 
-        /* 第二页：练习页样式（自适应布局） */
+        .btn-info {
+            background-color: #0288d1;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #0277bd;
+        }
+
+        /* 第二页：练习页样式 */
         .practice-container {
             display: flex;
             flex-direction: column;
@@ -230,7 +265,6 @@
             gap: 16px;
         }
 
-        /* 上半屏：内容展示区 */
         .content-display {
             flex: 1;
             background-color: #f9fbe7;
@@ -243,6 +277,7 @@
             align-items: center;
             overflow-y: auto;
             box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
+            text-align: center;
         }
 
         .chapter-tag {
@@ -251,7 +286,7 @@
             background-color: #f0f4c3;
             padding: 4px 12px;
             border-radius: 12px;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
             font-weight: bold;
         }
 
@@ -263,7 +298,27 @@
             word-break: break-all;
         }
 
-        /* 下半屏：交互与控制区 */
+        /* 被挖空的字样式 */
+        .blank-char {
+            display: inline-block;
+            min-width: 1.5em;
+            border-bottom: 3px solid #e53935;
+            color: #e53935;
+            font-weight: bold;
+            text-align: center;
+            padding: 0 4px;
+            margin: 0 2px;
+            background-color: #ffebee;
+            border-radius: 4px;
+        }
+
+        /* 揭晓答案后的字样式 */
+        .revealed-char {
+            color: #43a047;
+            border-bottom-color: #43a047;
+            background-color: #e8f5e9;
+        }
+
         .controls-area {
             display: flex;
             flex-direction: column;
@@ -271,7 +326,6 @@
             flex-shrink: 0;
         }
 
-        /* 进度条 */
         .progress-bar-container {
             width: 100%;
             height: 10px;
@@ -287,7 +341,6 @@
             transition: width 0.3s ease;
         }
 
-        /* 对错统计 */
         .stats-board {
             display: flex;
             justify-content: space-around;
@@ -302,25 +355,21 @@
         .stat-wrong { color: #e53935; }
         .stat-total { color: #757575; }
 
-        /* 对错判断按钮 */
         .action-row {
             display: flex;
             gap: 16px;
             justify-content: center;
         }
 
-        /* 媒体查询：在大屏幕/电脑端（min-width: 768px）优化左右或上下排版比例 */
         @media (min-width: 768px) {
             .app-card {
                 height: 80vh;
             }
-
             .paragraph-text {
                 padding: 0 20px;
             }
         }
 
-        /* 加载与错误提示 */
         .loading-text {
             text-align: center;
             color: #666;
@@ -332,14 +381,14 @@
 <body>
 
     <div class="app-card">
-        <!-- 第一页：内容选择页 -->
+        <!-- 第一页：选择页 -->
         <div id="page-select" class="page active">
             <div class="page-title">《论语》考察内容选择</div>
             <div id="tree-container" class="tree-container">
                 <div class="loading-text">正在加载 lunyu.txt 内容...</div>
             </div>
             <div class="button-bar">
-                <button class="btn btn-secondary" onclick="resetSelection()">重新选择</button>
+                <button class="btn btn-secondary" onclick="resetSelection()">重置勾选</button>
                 <button class="btn btn-primary" onclick="startPractice()">开始练习</button>
             </div>
         </div>
@@ -347,34 +396,29 @@
         <!-- 第二页：练习页 -->
         <div id="page-practice" class="page">
             <div class="practice-container">
-                <!-- 上半屏：文本显示区 -->
                 <div class="content-display">
                     <div id="display-chapter" class="chapter-tag">章节名称</div>
                     <div id="display-text" class="paragraph-text">准备开始...</div>
                 </div>
 
-                <!-- 下半屏：控制与统计区 -->
                 <div class="controls-area">
-                    <!-- 进度条 -->
                     <div class="progress-bar-container">
                         <div id="progress-fill" class="progress-bar-fill"></div>
                     </div>
 
-                    <!-- 对错统计 -->
                     <div class="stats-board">
                         <div>正确: <span id="stat-correct" class="stat-correct">0</span></div>
                         <div>错误: <span id="stat-wrong" class="stat-wrong">0</span></div>
                         <div>剩余: <span id="stat-remaining" class="stat-total">0</span></div>
                     </div>
 
-                    <!-- 对错按钮 -->
                     <div class="action-row">
                         <button class="btn btn-success" onclick="recordAnswer(true)">正确 (✓)</button>
                         <button class="btn btn-danger" onclick="recordAnswer(false)">错误 (✕)</button>
                     </div>
 
-                    <!-- 底部控制按钮 -->
                     <div class="button-bar">
+                        <button class="btn btn-info" onclick="toggleAnswer()">显示/隐藏答案</button>
                         <button class="btn btn-secondary" onclick="backToSelect()">重新选择</button>
                         <button class="btn btn-primary" onclick="nextQuestion()">下一个</button>
                     </div>
@@ -384,23 +428,23 @@
     </div>
 
     <script>
-        // 全局数据结构与状态
         let parsedData = { book: "论语", chapters: [] };
         let selectedParagraphs = [];
         let practiceQueue = [];
         let currentIndex = 0;
         let stats = { correct: 0, wrong: 0 };
+        let currentTargetChar = "";
+        let isAnswerRevealed = false;
 
-        // 页面加载完成后自动读取同目录下的 lunyu.txt
         document.addEventListener("DOMContentLoaded", () => {
             fetchLunyuText();
         });
 
-        // 1. 读取并解析 lunyu.txt
+        // 1. 读取 lunyu.txt (包含时间戳参数防 GitHub CDN 缓存)
         async function fetchLunyuText() {
             const treeContainer = document.getElementById('tree-container');
             try {
-                const response = await fetch('./lunyu.txt');
+                const response = await fetch(`lunyu.txt?v=${new Date().getTime()}`);
                 if (!response.ok) {
                     throw new Error(`无法获取文件，状态码: ${response.status}`);
                 }
@@ -415,19 +459,16 @@
             }
         }
 
-        // 解析标签式文本格式
+        // 解析文本格式
         function parseLunyuFormat(rawText) {
-            // 提取 <book>
             const bookMatch = rawText.match(/<book>(.*?)<\/book>/s);
             if (bookMatch) {
                 parsedData.book = bookMatch[1].trim();
             }
 
-            // 提取 <content> 内文本
             const contentMatch = rawText.match(/<content>([\s\S]*?)<\/content>/s);
             const contentText = contentMatch ? contentMatch[1] : rawText;
 
-            // 按章节分割（如“学而第一”、“为政第二”等）
             const lines = contentText.split('\n');
             let currentChapter = null;
 
@@ -435,7 +476,6 @@
                 const trimmed = line.trim();
                 if (!trimmed) return;
 
-                // 匹配章节标题：形如 "学而第一"、"为政第二" 等
                 if (/^[\u4e00-\u9fa5]+第[一二三四五六七八九十]+$/.test(trimmed)) {
                     currentChapter = {
                         title: trimmed,
@@ -443,13 +483,12 @@
                     };
                     parsedData.chapters.push(currentChapter);
                 } else if (currentChapter) {
-                    // 章节下的段落内容
                     currentChapter.paragraphs.push(trimmed);
                 }
             });
         }
 
-        // 2. 渲染第一页内容选择树
+        // 2. 渲染树形列表（添加折叠功能）
         function renderSelectionTree() {
             const container = document.getElementById('tree-container');
             container.innerHTML = '';
@@ -457,36 +496,59 @@
             const bookDiv = document.createElement('div');
             bookDiv.className = 'book-item';
             
-            const bookTitle = document.createElement('div');
-            bookTitle.className = 'book-title';
-            bookTitle.textContent = parsedData.book;
-            bookDiv.appendChild(bookTitle);
+            // 书名头（点击可折叠全书）
+            const bookHeader = document.createElement('div');
+            bookHeader.className = 'book-header';
+            bookHeader.innerHTML = `<span class="toggle-icon" id="book-icon">▼</span><span>${parsedData.book}</span>`;
+            
+            const chapterList = document.createElement('div');
+            chapterList.className = 'chapter-list';
+            chapterList.id = 'book-chapter-list';
+
+            bookHeader.onclick = () => {
+                const isCollapsed = chapterList.classList.toggle('collapsed');
+                document.getElementById('book-icon').textContent = isCollapsed ? '▶' : '▼';
+            };
+
+            bookDiv.appendChild(bookHeader);
 
             parsedData.chapters.forEach((chap, cIdx) => {
                 const chapDiv = document.createElement('div');
                 chapDiv.className = 'chapter-item';
 
-                // 章节标头 + 章节勾选框
+                // 章节标头
                 const chapHeader = document.createElement('div');
                 chapHeader.className = 'chapter-header';
-                
+
+                const toggleIcon = document.createElement('span');
+                toggleIcon.className = 'toggle-icon';
+                toggleIcon.textContent = '▼';
+                toggleIcon.id = `chap-icon-${cIdx}`;
+
                 const chapCheckbox = document.createElement('input');
                 chapCheckbox.type = 'checkbox';
                 chapCheckbox.id = `chap-${cIdx}`;
+                chapCheckbox.onclick = (e) => e.stopPropagation(); // 阻止冒泡，避免触发折叠
                 chapCheckbox.onchange = (e) => toggleChapter(cIdx, e.target.checked);
 
-                const chapLabel = document.createElement('label');
-                chapLabel.htmlFor = `chap-${cIdx}`;
+                const chapLabel = document.createElement('span');
                 chapLabel.textContent = chap.title;
-                chapLabel.style.cursor = 'pointer';
 
+                chapHeader.appendChild(toggleIcon);
                 chapHeader.appendChild(chapCheckbox);
                 chapHeader.appendChild(chapLabel);
-                chapDiv.appendChild(chapHeader);
 
                 // 段落列表
                 const paraList = document.createElement('div');
                 paraList.className = 'paragraph-list';
+                paraList.id = `para-list-${cIdx}`;
+
+                // 点击章节标题展开/收起段落
+                chapHeader.onclick = (e) => {
+                    if (e.target === chapCheckbox) return;
+                    const isCollapsed = paraList.classList.toggle('collapsed');
+                    toggleIcon.textContent = isCollapsed ? '▶' : '▼';
+                };
 
                 chap.paragraphs.forEach((para, pIdx) => {
                     const paraItem = document.createElement('div');
@@ -502,7 +564,6 @@
 
                     const paraLabel = document.createElement('label');
                     paraLabel.htmlFor = `para-${cIdx}-${pIdx}`;
-                    // 仅截取前20字显示概要
                     const shortText = para.length > 25 ? para.substring(0, 25) + '...' : para;
                     paraLabel.textContent = `${pIdx + 1}. ${shortText}`;
                     paraLabel.style.cursor = 'pointer';
@@ -512,34 +573,33 @@
                     paraList.appendChild(paraItem);
                 });
 
+                chapDiv.appendChild(chapHeader);
                 chapDiv.appendChild(paraList);
-                bookDiv.appendChild(chapDiv);
+                chapterList.appendChild(chapDiv);
             });
 
+            bookDiv.appendChild(chapterList);
             container.appendChild(bookDiv);
         }
 
-        // 章节全选 / 反选段落
+        // 章节全选/反选
         function toggleChapter(cIdx, isChecked) {
             const checkboxes = document.querySelectorAll(`.p-check-${cIdx}`);
             checkboxes.forEach(cb => cb.checked = isChecked);
         }
 
-        // 子段落改变时更新章节勾选框状态
         function updateChapterCheckbox(cIdx) {
             const chapCb = document.getElementById(`chap-${cIdx}`);
             const checkboxes = Array.from(document.querySelectorAll(`.p-check-${cIdx}`));
-            const allChecked = checkboxes.every(cb => cb.checked);
-            chapCb.checked = allChecked;
+            chapCb.checked = checkboxes.every(cb => cb.checked);
         }
 
-        // 取消所有选择
         function resetSelection() {
             const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"]');
             checkboxes.forEach(cb => cb.checked = false);
         }
 
-        // 3. 开始练习与初始化练习队列
+        // 3. 开始练习
         function startPractice() {
             selectedParagraphs = [];
             const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
@@ -556,23 +616,21 @@
             });
 
             if (selectedParagraphs.length === 0) {
-                alert('请至少勾选一个章节或段落！');
+                alert('请至少勾选一个段落！');
                 return;
             }
 
-            // 深拷贝生成练习队列
             practiceQueue = [...selectedParagraphs];
             currentIndex = 0;
             stats = { correct: 0, wrong: 0 };
 
-            // 切换页面
             document.getElementById('page-select').classList.remove('active');
             document.getElementById('page-practice').classList.add('active');
 
             renderCurrentQuestion();
         }
 
-        // 渲染当前练习题目
+        // 4. 渲染题目：随机抽取汉字挖空
         function renderCurrentQuestion() {
             if (currentIndex >= practiceQueue.length) {
                 alert(`练习完成！\n正确: ${stats.correct} 次\n错误: ${stats.wrong} 次`);
@@ -580,11 +638,40 @@
                 return;
             }
 
+            isAnswerRevealed = false;
             const current = practiceQueue[currentIndex];
-            document.getElementById('display-chapter').textContent = current.chapterTitle;
-            document.getElementById('display-text').textContent = current.text;
+            const originalText = current.text;
 
-            // 更新进度条与统计
+            // 查找所有汉字的位置索引（排除标点符号、空格、英文字母及数字）
+            const chineseCharRegex = /[\u4e00-\u9fa5]/;
+            const validIndices = [];
+
+            for (let i = 0; i < originalText.length; i++) {
+                if (chineseCharRegex.test(originalText[i])) {
+                    validIndices.push(i);
+                }
+            }
+
+            document.getElementById('display-chapter').textContent = current.chapterTitle;
+
+            if (validIndices.length === 0) {
+                // 如果没有可挖空的汉字，直接展示原文
+                currentTargetChar = "";
+                document.getElementById('display-text').textContent = originalText;
+            } else {
+                // 随机抽取一个汉字索引
+                const randomIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
+                currentTargetChar = originalText[randomIndex];
+
+                // 替换抽中的汉字为下划线挖空元素
+                const textBefore = originalText.substring(0, randomIndex);
+                const textAfter = originalText.substring(randomIndex + 1);
+
+                document.getElementById('display-text').innerHTML = 
+                    `${escapeHtml(textBefore)}<span id="blank-element" class="blank-char">&nbsp;?&nbsp;</span>${escapeHtml(textAfter)}`;
+            }
+
+            // 更新进度与统计
             const total = practiceQueue.length;
             const progress = (currentIndex / total) * 100;
             document.getElementById('progress-fill').style.width = `${progress}%`;
@@ -594,7 +681,22 @@
             document.getElementById('stat-remaining').textContent = total - currentIndex;
         }
 
-        // 记录答题对错
+        // 切换答案显示状态
+        function toggleAnswer() {
+            const blankEl = document.getElementById('blank-element');
+            if (!blankEl || !currentTargetChar) return;
+
+            if (!isAnswerRevealed) {
+                blankEl.textContent = currentTargetChar;
+                blankEl.classList.add('revealed-char');
+                isAnswerRevealed = true;
+            } else {
+                blankEl.innerHTML = '&nbsp;?&nbsp;';
+                blankEl.classList.remove('revealed-char');
+                isAnswerRevealed = false;
+            }
+        }
+
         function recordAnswer(isCorrect) {
             if (isCorrect) {
                 stats.correct++;
@@ -604,16 +706,24 @@
             nextQuestion();
         }
 
-        // 下一个
         function nextQuestion() {
             currentIndex++;
             renderCurrentQuestion();
         }
 
-        // 返回选择页
         function backToSelect() {
             document.getElementById('page-practice').classList.remove('active');
             document.getElementById('page-select').classList.add('active');
+        }
+
+        // 转义 HTML 字符防止注入
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>
