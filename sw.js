@@ -1,5 +1,5 @@
 // 定义当前缓存版本号，更新代码或数据时修改版本号可强制更新
-const CACHE_NAME = 'chouka-v1.0.1';
+const CACHE_NAME = 'chouka-v1.0.2';
 
 // 需要离线缓存的文件列表
 const ASSETS_TO_CACHE = [
