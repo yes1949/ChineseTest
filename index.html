@@ -27,25 +27,13 @@
         }
         header {
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 15px;
             width: 100%;
             max-width: 400px;
-            position: relative;
         }
         h1 {
             font-size: 1.8rem;
             color: #1a237e;
-            margin-bottom: 8px;
-        }
-        .mode-tag {
-            display: inline-block;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #f44336;
-            background-color: #ffebee;
-            border: 1px solid #ffcdd2;
-            padding: 2px 10px;
-            border-radius: 12px;
             margin-bottom: 8px;
         }
         .stats {
@@ -54,104 +42,39 @@
             display: flex;
             gap: 12px;
             justify-content: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
-        .change-book-btn {
-            position: absolute;
-            right: 0;
-            top: 4px;
-            font-size: 0.8rem;
-            color: #3f51b5;
-            background: none;
-            border: none;
-            cursor: pointer;
-            text-decoration: underline;
-            padding: 0;
-            width: auto;
+        /* 错字重练提示与进度条 */
+        .relearn-banner {
+            display: none;
+            color: #f44336;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            text-align: center;
         }
-
-        /* 进度条 */
         .progress-container {
+            display: none;
             width: 100%;
-            height: 8px;
             background-color: #e0e0e0;
-            border-radius: 4px;
+            border-radius: 8px;
+            height: 10px;
             overflow: hidden;
+            margin-top: 4px;
         }
         .progress-bar {
             height: 100%;
+            background-color: #f44336;
             width: 0%;
-            background-color: #4caf50;
             transition: width 0.3s ease;
         }
-        .progress-bar.error-mode {
-            background-color: #f44336;
-        }
 
-        /* 页面视图选择框 */
-        .view-section {
-            width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .hidden {
-            display: none !important;
-        }
-
-        /* 内容选择页样式 */
-        .selection-card {
-            background: #fff;
-            width: 100%;
-            padding: 24px;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-top: 20px;
-            text-align: center;
-        }
-        .selection-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 16px;
-            color: #2c3e50;
-        }
-        .preset-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        .btn-select-book {
-            background-color: #e8eaf6;
-            color: #3f51b5;
-            border: 1px solid #c5cae9;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-select-book:hover {
-            background-color: #c5cae9;
-        }
-        .file-upload-wrapper {
-            position: relative;
-            margin-top: 10px;
-        }
-        .btn-upload {
-            background-color: #eceff1;
-            color: #455a64;
-            border: 1px stroke #b0bec5;
-        }
-
-        /* 抽卡样式 */
         .card-container {
             width: 100%;
             max-width: 400px;
             height: 320px;
             perspective: 1000px;
             margin-bottom: 20px;
-            margin-top: 10px;
         }
         .card {
             width: 100%;
@@ -180,35 +103,39 @@
             padding: 24px;
             text-align: center;
         }
-        .card-front { border: 2px solid #3f51b5; }
+        .card-front {
+            border: 2px solid #3f51b5;
+        }
         .card-back {
             transform: rotateY(180deg);
             background: #fafafa;
             border: 2px solid #4caf50;
         }
-        .card-score {
-            font-size: 0.95rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-        }
-        .score-correct { color: #4caf50; }
-        .score-wrong { color: #f44336; margin-left: 8px; }
-
         .char {
-            font-size: 4.5rem;
+            font-size: 5rem;
             font-weight: bold;
             color: #2c3e50;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         .hint {
             font-size: 0.85rem;
             color: #999;
         }
+        
+        /* 背面样式调整：顶部显示错题记录，下方换行显示例句 */
+        .history-record {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+        .stat-correct { color: #4caf50; }
+        .stat-wrong { color: #f44336; }
+
         .context-sentence {
             font-size: 1.2rem;
             line-height: 1.6;
             color: #333;
-            margin-bottom: 12px;
             word-break: break-all;
         }
         .highlight {
@@ -233,137 +160,86 @@
             cursor: pointer;
             transition: background 0.2s, transform 0.1s;
         }
-        button:active { transform: scale(0.98); }
-        .btn-know { background-color: #4caf50; color: white; }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-know {
+            background-color: #4caf50;
+            color: white;
+        }
         .btn-know:hover { background-color: #43a047; }
-        .btn-forget { background-color: #f44336; color: white; }
+        .btn-forget {
+            background-color: #f44336;
+            color: white;
+        }
         .btn-forget:hover { background-color: #e53935; }
-        .btn-restart { background-color: #3f51b5; color: white; margin-top: 16px; }
-        .finish-container { text-align: center; margin-top: 60px; width: 100%; }
+        .btn-restart {
+            background-color: #3f51b5;
+            color: white;
+            margin-top: 15px;
+            padding: 12px 24px;
+            font-size: 1rem;
+        }
+        .loading {
+            font-size: 1.2rem;
+            color: #666;
+            margin-top: 100px;
+        }
+        .finish-box {
+            text-align: center;
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
 
     <header>
         <h1>抽卡认字</h1>
-        <button id="change-book-btn" class="change-book-btn hidden" onclick="showSelectionView()">重新选书</button>
-        <div id="mode-tag-container"></div>
-        <div class="stats" id="header-stats">
+        <div class="stats">
             <span>总字数: <strong id="total-count">0</strong></span>
-            <span>待学习: <strong id="review-count">0</strong></span>
+            <span>待复习: <strong id="review-count">0</strong></span>
         </div>
-        <div class="progress-container" id="header-progress">
-            <div class="progress-bar" id="progress-bar"></div>
+        <!-- 错字重练模式提示与进度条 -->
+        <div id="relearn-banner" class="relearn-banner">⚠️ 错字重练环节</div>
+        <div id="progress-container" class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
         </div>
     </header>
 
-    <!-- 视图 1：内容选择页 -->
-    <div id="selection-view" class="view-section">
-        <div class="selection-card">
-            <div class="selection-title">请选择学习内容</div>
-            <div class="preset-list">
-                <button class="btn-select-book" onclick="loadPresetFile('./lunyu.txt')">📖 预设：《论语》</button>
-            </div>
-            <hr style="margin: 16px 0; border: none; border-top: 1px dashed #ccc;">
-            <div class="selection-title" style="font-size: 1rem; color: #666;">或导入自己的文本</div>
-            <input type="file" id="file-input" accept=".txt" style="display: none;" onchange="handleFileUpload(event)">
-            <button class="btn-select-book btn-upload" onclick="document.getElementById('file-input').click()">📁 上传自定义 .txt 文件</button>
-        </div>
-    </div>
-
-    <!-- 视图 2：抽卡练习页 -->
-    <div id="practice-view" class="view-section hidden">
-        <div class="card-container">
-            <div class="card" id="card" onclick="flipCard()">
-                <div class="card-face card-front">
-                    <div class="card-score" id="score-front">正确: 0 错误: 0</div>
-                    <div class="char" id="card-char">-</div>
-                    <div class="hint">点击卡片翻面查看释义与例句</div>
-                </div>
-                <div class="card-face card-back">
-                    <div class="card-score" id="score-back">正确: 0 错误: 0</div>
-                    <div class="context-sentence" id="card-sentence"></div>
-                </div>
-            </div>
-        </div>
-        <div class="btn-group">
-            <button class="btn-know" onclick="handleResult(true)">认识</button>
-            <button class="btn-forget" onclick="handleResult(false)">不认识</button>
-        </div>
-    </div>
-
-    <!-- 视图 3：结算页 -->
-    <div id="finish-view" class="view-section hidden">
-        <div class="finish-container">
-            <h2>🎉 恭喜！已通关所有汉字</h2>
-            <button class="btn-restart" onclick="startNewPractice()">再练一次</button>
-            <button class="btn-restart" style="background-color: #78909c; margin-top: 10px;" onclick="showSelectionView()">切换其他文本</button>
-        </div>
-    </div>
+    <div id="app" class="loading">正在加载文本数据...</div>
 
     <script>
-        let allCards = [];         
-        let currentQueue = [];     
-        let wrongQueue = [];       
-        let isErrorMode = false;   
-        let totalInCurrentRound = 0;
+        // 原始解析出的完整卡片池
+        let rawCardsPool = [];
+        // 当前练习队列
+        let cards = [];
+        let currentIndex = 0;
 
-        // 显示内容选择页
-        function showSelectionView() {
-            document.getElementById('selection-view').classList.remove('hidden');
-            document.getElementById('practice-view').classList.add('hidden');
-            document.getElementById('finish-view').classList.add('hidden');
-            
-            document.getElementById('change-book-btn').classList.add('hidden');
-            document.getElementById('header-stats').style.visibility = 'hidden';
-            document.getElementById('header-progress').style.visibility = 'hidden';
-            document.getElementById('mode-tag-container').innerHTML = '';
-        }
+        // 错字重练状态控制
+        let isRelearnMode = false;
+        let relearnTotal = 0; // 重练模式初始错字总量
 
-        // 加载预设文件
-        async function loadPresetFile(filePath) {
+        // 初始化加载数据
+        async function init() {
             try {
-                const response = await fetch(filePath);
-                if (!response.ok) throw new Error('读取预设文本失败');
+                const response = await fetch('./lunyu.txt');
+                if (!response.ok) throw new Error('无法读取文本文件');
                 const text = await response.text();
-                startWithText(text);
+                
+                processText(text);
+                if (rawCardsPool.length === 0) {
+                    document.getElementById('app').innerHTML = '文本解析为空，请检查文件。';
+                    return;
+                }
+                
+                startNewSession();
             } catch (err) {
-                alert('加载预设文本失败，请确保 ' + filePath + ' 放置在根目录。');
+                console.error(err);
+                document.getElementById('app').innerHTML = '加载失败，请确保本地已放置 lunyu.txt。';
             }
         }
 
-        // 上传文件解析
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                startWithText(e.target.result);
-            };
-            reader.readAsText(file, 'UTF-8');
-        }
-
-        // 处理文本并进入练习
-        function startWithText(text) {
-            processText(text);
-            if (allCards.length === 0) {
-                alert('文本解析为空，未识别到有效汉字！');
-                return;
-            }
-            
-            document.getElementById('selection-view').classList.add('hidden');
-            document.getElementById('finish-view').classList.add('hidden');
-            document.getElementById('practice-view').classList.remove('hidden');
-            
-            document.getElementById('change-book-btn').classList.remove('hidden');
-            document.getElementById('header-stats').style.visibility = 'visible';
-            document.getElementById('header-progress').style.visibility = 'visible';
-
-            startNewPractice();
-        }
-
-        // 解析文本
+        // 解析文本并构建基础抽卡数据
         function processText(text) {
             const rawSentences = text.split(/[。！？；\n\r]/);
             const cleanSentences = rawSentences
@@ -377,9 +253,7 @@
                     if (!cardMap.has(char)) {
                         cardMap.set(char, {
                             char: char,
-                            sentences: [sentence],
-                            correctCount: 0,
-                            wrongCount: 0
+                            sentences: [sentence]
                         });
                     } else {
                         const data = cardMap.get(char);
@@ -390,95 +264,103 @@
                 }
             });
 
-            allCards = Array.from(cardMap.values());
+            rawCardsPool = Array.from(cardMap.values());
         }
 
-        // 重新开启练习
-        function startNewPractice() {
-            allCards.forEach(card => {
-                card.correctCount = 0;
-                card.wrongCount = 0;
-            });
+        // 开启全新一轮练习 (重置所有答题记录)
+        function startNewSession() {
+            // 深拷贝卡片数据，重置答题正确/错误计数
+            cards = rawCardsPool.map(item => ({
+                ...item,
+                correctCount: 0,
+                wrongCount: 0
+            }));
 
-            currentQueue = [...allCards];
-            shuffle(currentQueue);
-
-            wrongQueue = [];
-            isErrorMode = false;
-            totalInCurrentRound = currentQueue.length;
-
-            document.getElementById('finish-view').classList.add('hidden');
-            document.getElementById('practice-view').classList.remove('hidden');
-
-            updateHeader();
-            showNextCard();
-        }
-
-        // 错字重练模式
-        function startErrorPractice() {
-            currentQueue = [...wrongQueue];
-            shuffle(currentQueue);
-            wrongQueue = [];
-            isErrorMode = true;
-            totalInCurrentRound = currentQueue.length;
-
-            updateHeader();
-            showNextCard();
-        }
-
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
+            // 洗牌算法
+            for (let i = cards.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
+                [cards[i], cards[j]] = [cards[j], cards[i]];
             }
-        }
 
-        function flipCard() {
-            document.getElementById('card').classList.toggle('flipped');
-        }
+            currentIndex = 0;
+            isRelearnMode = false;
+            relearnTotal = 0;
 
-        function updateHeader() {
-            const tagContainer = document.getElementById('mode-tag-container');
-            const progressBar = document.getElementById('progress-bar');
+            // 重置 UI 提示
+            document.getElementById('relearn-banner').style.display = 'none';
+            document.getElementById('progress-container').style.display = 'none';
+            document.getElementById('total-count').textContent = cards.length;
             
-            if (isErrorMode) {
-                tagContainer.innerHTML = `<span class="mode-tag">错字重练</span>`;
-                progressBar.classList.add('error-mode');
-            } else {
-                tagContainer.innerHTML = '';
-                progressBar.classList.remove('error-mode');
-            }
-
-            document.getElementById('total-count').textContent = totalInCurrentRound;
-            document.getElementById('review-count').textContent = currentQueue.length;
-
-            const completed = totalInCurrentRound - currentQueue.length;
-            const progress = totalInCurrentRound > 0 ? (completed / totalInCurrentRound) * 100 : 0;
-            progressBar.style.width = `${progress}%`;
+            renderCardUI();
+            showNextCard();
         }
 
+        // 渲染基础结构
+        function renderCardUI() {
+            const app = document.getElementById('app');
+            app.className = '';
+            app.innerHTML = `
+                <div class="card-container">
+                    <div class="card" id="card" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <div class="char" id="card-char">-</div>
+                            <div class="hint">点击卡片翻面查看释义与例句</div>
+                        </div>
+                        <div class="card-face card-back">
+                            <!-- 需求4：第一行显示正确/错误记录 -->
+                            <div class="history-record">
+                                正确：<span class="stat-correct" id="card-correct">0</span> ，错误：<span class="stat-wrong" id="card-wrong">0</span>
+                            </div>
+                            <!-- 换行显示例句内容 -->
+                            <div class="context-sentence" id="card-sentence"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 需求2：认识与不认识互换位置（认识在左，不认识在右） -->
+                <div class="btn-group">
+                    <button class="btn-know" onclick="handleResult(true)">认识</button>
+                    <button class="btn-forget" onclick="handleResult(false)">不认识</button>
+                </div>
+            `;
+        }
+
+        // 翻转卡片
+        function flipCard() {
+            const card = document.getElementById('card');
+            card.classList.toggle('flipped');
+        }
+
+        // 显示下一张卡片及更新进度
         function showNextCard() {
-            if (currentQueue.length === 0) {
-                if (wrongQueue.length > 0) {
-                    startErrorPractice();
-                } else {
-                    showFinishUI();
-                }
+            // 练习完毕后的处理
+            if (cards.length === 0) {
+                document.getElementById('relearn-banner').style.display = 'none';
+                document.getElementById('progress-container').style.display = 'none';
+                document.getElementById('review-count').textContent = 0;
+                
+                // 需求3：再练一次将重置并重新开始
+                document.getElementById('app').innerHTML = `
+                    <div class="finish-box">
+                        <h2>🎉 恭喜！已完成所有汉字练习</h2>
+                        <button class="btn-restart" onclick="startNewSession()">再练一次</button>
+                    </div>
+                `;
                 return;
             }
 
-            const currentCard = currentQueue[0];
+            // 获取当前卡片
+            const currentCard = cards[currentIndex % cards.length];
             const cardEl = document.getElementById('card');
             
+            // 确保翻回正面
             cardEl.classList.remove('flipped');
 
             setTimeout(() => {
-                const scoreText = `<span class="score-correct">正确: ${currentCard.correctCount}</span><span class="score-wrong">错误: ${currentCard.wrongCount}</span>`;
-                document.getElementById('score-front').innerHTML = scoreText;
-                document.getElementById('score-back').innerHTML = scoreText;
-
                 document.getElementById('card-char').textContent = currentCard.char;
+                document.getElementById('card-correct').textContent = currentCard.correctCount;
+                document.getElementById('card-wrong').textContent = currentCard.wrongCount;
                 
+                // 处理例句高亮
                 const rawSentence = currentCard.sentences[0] || '';
                 const highlightedSentence = rawSentence.replace(
                     new RegExp(currentCard.char, 'g'),
@@ -487,55 +369,80 @@
                 document.getElementById('card-sentence').innerHTML = `“${highlightedSentence}”`;
             }, cardEl.classList.contains('flipped') ? 300 : 0);
 
-            updateHeader();
+            document.getElementById('review-count').textContent = cards.length;
+
+            // 更新错字重练模式下的进度条
+            if (isRelearnMode && relearnTotal > 0) {
+                const completed = relearnTotal - cards.length;
+                const percent = Math.max(0, Math.min(100, (completed / relearnTotal) * 100));
+                document.getElementById('progress-bar').style.width = percent + '%';
+            }
         }
 
+        // 处理认识/不认识逻辑
         function handleResult(known) {
-            if (currentQueue.length === 0) return;
+            if (cards.length === 0) return;
 
-            const currentCard = currentQueue[0];
+            const currentCard = cards[currentIndex % cards.length];
 
             if (known) {
+                // 答对：更新计数并移除出当前队列
                 currentCard.correctCount++;
-                currentQueue.shift();
+                cards.splice(currentIndex % cards.length, 1);
             } else {
+                // 答错：更新计数并移到队列靠后位置
                 currentCard.wrongCount++;
-                if (!wrongQueue.includes(currentCard)) {
-                    wrongQueue.push(currentCard);
-                }
-                const item = currentQueue.shift();
-                currentQueue.push(item);
+                currentIndex++;
             }
 
+            // 检查常规练习是否刚好结束，自动启动需求1：错字重练环节
+            if (!isRelearnMode && cards.length === 0) {
+                // 从初始池中筛选出有过错误记录的字
+                const wrongCards = rawCardsPool.filter(c => c.wrongCount > 0);
+                if (wrongCards.length > 0) {
+                    isRelearnMode = true;
+                    cards = wrongCards;
+                    relearnTotal = cards.length;
+
+                    // 显示红色字样与进度条
+                    document.getElementById('relearn-banner').style.display = 'block';
+                    document.getElementById('progress-container').style.display = 'block';
+                    document.getElementById('progress-bar').style.width = '0%';
+                }
+            }
+
+            if (cards.length > 0) {
+                currentIndex = currentIndex % cards.length;
+            }
             showNextCard();
         }
 
-        function showFinishUI() {
-            document.getElementById('mode-tag-container').innerHTML = '';
-            document.getElementById('progress-bar').style.width = '100%';
-            document.getElementById('review-count').textContent = '0';
+        // 初始化调用
+        init();
 
-            document.getElementById('practice-view').classList.add('hidden');
-            document.getElementById('finish-view').classList.remove('hidden');
-        }
-
-        // 初始化显示选书页面
-        showSelectionView();
-
-        // Service Worker 自动注册与后台更新
+        // -------------------------------------------------------------
+        // Service Worker 自动注册与后台更新拦截逻辑
+        // -------------------------------------------------------------
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    console.log('SW Registered:', registration);
+
                     registration.onupdatefound = () => {
                         const installingWorker = registration.installing;
                         if (installingWorker == null) return;
                         installingWorker.onstatechange = () => {
-                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                window.location.reload();
+                            if (installingWorker.state === 'installed') {
+                                if (navigator.serviceWorker.controller) {
+                                    console.log('检测到新版本，准备自动更新刷新...');
+                                    window.location.reload();
+                                }
                             }
                         };
                     };
-                }).catch((err) => console.error('SW Failed:', err));
+                }).catch((err) => {
+                    console.error('SW Registration Failed:', err);
+                });
             });
 
             let refreshing = false;
