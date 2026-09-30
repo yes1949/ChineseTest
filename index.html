@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>论语背诵练习</title>
+    <title>论语抽卡识字练习</title>
     <style>
         * {
             box-sizing: border-box;
@@ -212,52 +212,18 @@
             text-align: center;
         }
 
-        .btn-secondary {
-            background-color: #e0e0e0;
-            color: #424242;
-        }
+        .btn-secondary { background-color: #e0e0e0; color: #424242; }
+        .btn-secondary:hover { background-color: #d5d5d5; }
+        .btn-primary { background-color: #3f51b5; color: white; }
+        .btn-primary:hover { background-color: #303f9f; }
+        .btn-danger { background-color: #e53935; color: white; }
+        .btn-danger:hover { background-color: #c62828; }
+        .btn-success { background-color: #43a047; color: white; }
+        .btn-success:hover { background-color: #2e7d32; }
+        .btn-info { background-color: #0288d1; color: white; }
+        .btn-info:hover { background-color: #0277bd; }
 
-        .btn-secondary:hover {
-            background-color: #d5d5d5;
-        }
-
-        .btn-primary {
-            background-color: #3f51b5;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #303f9f;
-        }
-
-        .btn-danger {
-            background-color: #e53935;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background-color: #c62828;
-        }
-
-        .btn-success {
-            background-color: #43a047;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background-color: #2e7d32;
-        }
-
-        .btn-info {
-            background-color: #0288d1;
-            color: white;
-        }
-
-        .btn-info:hover {
-            background-color: #0277bd;
-        }
-
-        /* 第二页：练习页样式 */
+        /* 第二页：抽卡识字界面 */
         .practice-container {
             display: flex;
             flex-direction: column;
@@ -278,6 +244,7 @@
             overflow-y: auto;
             box-shadow: inset 0 2px 6px rgba(0,0,0,0.03);
             text-align: center;
+            position: relative;
         }
 
         .chapter-tag {
@@ -286,37 +253,53 @@
             background-color: #f0f4c3;
             padding: 4px 12px;
             border-radius: 12px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             font-weight: bold;
         }
 
-        .paragraph-text {
-            font-size: clamp(18px, 3.5vw, 26px);
-            line-height: 1.8;
-            color: #212121;
-            text-align: justify;
-            word-break: break-all;
+        /* 抽取的大字框（汉字卡片） */
+        .single-char-card {
+            font-size: clamp(72px, 18vw, 120px);
+            font-weight: bold;
+            color: #1a237e;
+            background: #ffffff;
+            width: clamp(120px, 30vw, 180px);
+            height: clamp(120px, 30vw, 180px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid #c5cae9;
+            margin: 10px 0;
+            user-select: none;
         }
 
-        /* 被挖空的字样式 */
-        .blank-char {
-            display: inline-block;
-            min-width: 1.5em;
-            border-bottom: 3px solid #e53935;
+        /* 上下文出处提示 */
+        .context-text {
+            font-size: 1rem;
+            color: #555;
+            margin-top: 12px;
+            line-height: 1.6;
+            max-width: 90%;
+            display: none; /* 默认隐藏上下文 */
+            background-color: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #3f51b5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .context-text.show {
+            display: block;
+        }
+
+        /* 出处段落中的高亮大字 */
+        .highlight-char {
             color: #e53935;
             font-weight: bold;
-            text-align: center;
-            padding: 0 4px;
-            margin: 0 2px;
-            background-color: #ffebee;
-            border-radius: 4px;
-        }
-
-        /* 揭晓答案后的字样式 */
-        .revealed-char {
-            color: #43a047;
-            border-bottom-color: #43a047;
-            background-color: #e8f5e9;
+            font-size: 1.15em;
+            text-decoration: underline;
         }
 
         .controls-area {
@@ -362,12 +345,7 @@
         }
 
         @media (min-width: 768px) {
-            .app-card {
-                height: 80vh;
-            }
-            .paragraph-text {
-                padding: 0 20px;
-            }
+            .app-card { height: 80vh; }
         }
 
         .loading-text {
@@ -381,24 +359,29 @@
 <body>
 
     <div class="app-card">
-        <!-- 第一页：选择页 -->
+        <!-- 第一页：内容选择页 -->
         <div id="page-select" class="page active">
-            <div class="page-title">《论语》考察内容选择</div>
+            <div class="page-title">《论语》抽卡识字选择</div>
             <div id="tree-container" class="tree-container">
                 <div class="loading-text">正在加载 lunyu.txt 内容...</div>
             </div>
             <div class="button-bar">
                 <button class="btn btn-secondary" onclick="resetSelection()">重置勾选</button>
-                <button class="btn btn-primary" onclick="startPractice()">开始练习</button>
+                <button class="btn btn-primary" onclick="startPractice()">开始抽卡练习</button>
             </div>
         </div>
 
-        <!-- 第二页：练习页 -->
+        <!-- 第二页：抽卡识字练习页 -->
         <div id="page-practice" class="page">
             <div class="practice-container">
                 <div class="content-display">
                     <div id="display-chapter" class="chapter-tag">章节名称</div>
-                    <div id="display-text" class="paragraph-text">准备开始...</div>
+                    
+                    <!-- 抽取的单字卡片 -->
+                    <div id="display-char-card" class="single-char-card">字</div>
+
+                    <!-- 原文上下文出处（默认隐藏，点击查看答案显示） -->
+                    <div id="display-context" class="context-text">出处段落...</div>
                 </div>
 
                 <div class="controls-area">
@@ -409,16 +392,16 @@
                     <div class="stats-board">
                         <div>正确: <span id="stat-correct" class="stat-correct">0</span></div>
                         <div>错误: <span id="stat-wrong" class="stat-wrong">0</span></div>
-                        <div>剩余: <span id="stat-remaining" class="stat-total">0</span></div>
+                        <div>剩余卡片: <span id="stat-remaining" class="stat-total">0</span></div>
                     </div>
 
                     <div class="action-row">
-                        <button class="btn btn-success" onclick="recordAnswer(true)">正确 (✓)</button>
-                        <button class="btn btn-danger" onclick="recordAnswer(false)">错误 (✕)</button>
+                        <button class="btn btn-success" onclick="recordAnswer(true)">认识 (✓)</button>
+                        <button class="btn btn-danger" onclick="recordAnswer(false)">不认识 (✕)</button>
                     </div>
 
                     <div class="button-bar">
-                        <button class="btn btn-info" onclick="toggleAnswer()">显示/隐藏答案</button>
+                        <button class="btn btn-info" onclick="toggleContext()">出处上下文</button>
                         <button class="btn btn-secondary" onclick="backToSelect()">重新选择</button>
                         <button class="btn btn-primary" onclick="nextQuestion()">下一个</button>
                     </div>
@@ -429,25 +412,21 @@
 
     <script>
         let parsedData = { book: "论语", chapters: [] };
-        let selectedParagraphs = [];
-        let practiceQueue = [];
+        let charCardsQueue = []; // 抽卡池队列
         let currentIndex = 0;
         let stats = { correct: 0, wrong: 0 };
-        let currentTargetChar = "";
-        let isAnswerRevealed = false;
+        let isContextShown = false;
 
         document.addEventListener("DOMContentLoaded", () => {
             fetchLunyuText();
         });
 
-        // 1. 读取 lunyu.txt (包含时间戳参数防 GitHub CDN 缓存)
+        // 1. 读取 lunyu.txt (防缓存)
         async function fetchLunyuText() {
             const treeContainer = document.getElementById('tree-container');
             try {
                 const response = await fetch(`lunyu.txt?v=${new Date().getTime()}`);
-                if (!response.ok) {
-                    throw new Error(`无法获取文件，状态码: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`状态码: ${response.status}`);
                 const text = await response.text();
                 parseLunyuFormat(text);
                 renderSelectionTree();
@@ -459,12 +438,10 @@
             }
         }
 
-        // 解析文本格式
+        // 解析标签式文本
         function parseLunyuFormat(rawText) {
             const bookMatch = rawText.match(/<book>(.*?)<\/book>/s);
-            if (bookMatch) {
-                parsedData.book = bookMatch[1].trim();
-            }
+            if (bookMatch) parsedData.book = bookMatch[1].trim();
 
             const contentMatch = rawText.match(/<content>([\s\S]*?)<\/content>/s);
             const contentText = contentMatch ? contentMatch[1] : rawText;
@@ -477,10 +454,7 @@
                 if (!trimmed) return;
 
                 if (/^[\u4e00-\u9fa5]+第[一二三四五六七八九十]+$/.test(trimmed)) {
-                    currentChapter = {
-                        title: trimmed,
-                        paragraphs: []
-                    };
+                    currentChapter = { title: trimmed, paragraphs: [] };
                     parsedData.chapters.push(currentChapter);
                 } else if (currentChapter) {
                     currentChapter.paragraphs.push(trimmed);
@@ -488,7 +462,7 @@
             });
         }
 
-        // 2. 渲染树形列表（添加折叠功能）
+        // 2. 渲染树形多选
         function renderSelectionTree() {
             const container = document.getElementById('tree-container');
             container.innerHTML = '';
@@ -496,14 +470,12 @@
             const bookDiv = document.createElement('div');
             bookDiv.className = 'book-item';
             
-            // 书名头（点击可折叠全书）
             const bookHeader = document.createElement('div');
             bookHeader.className = 'book-header';
             bookHeader.innerHTML = `<span class="toggle-icon" id="book-icon">▼</span><span>${parsedData.book}</span>`;
             
             const chapterList = document.createElement('div');
             chapterList.className = 'chapter-list';
-            chapterList.id = 'book-chapter-list';
 
             bookHeader.onclick = () => {
                 const isCollapsed = chapterList.classList.toggle('collapsed');
@@ -516,19 +488,17 @@
                 const chapDiv = document.createElement('div');
                 chapDiv.className = 'chapter-item';
 
-                // 章节标头
                 const chapHeader = document.createElement('div');
                 chapHeader.className = 'chapter-header';
 
                 const toggleIcon = document.createElement('span');
                 toggleIcon.className = 'toggle-icon';
                 toggleIcon.textContent = '▼';
-                toggleIcon.id = `chap-icon-${cIdx}`;
 
                 const chapCheckbox = document.createElement('input');
                 chapCheckbox.type = 'checkbox';
                 chapCheckbox.id = `chap-${cIdx}`;
-                chapCheckbox.onclick = (e) => e.stopPropagation(); // 阻止冒泡，避免触发折叠
+                chapCheckbox.onclick = (e) => e.stopPropagation();
                 chapCheckbox.onchange = (e) => toggleChapter(cIdx, e.target.checked);
 
                 const chapLabel = document.createElement('span');
@@ -538,12 +508,9 @@
                 chapHeader.appendChild(chapCheckbox);
                 chapHeader.appendChild(chapLabel);
 
-                // 段落列表
                 const paraList = document.createElement('div');
                 paraList.className = 'paragraph-list';
-                paraList.id = `para-list-${cIdx}`;
 
-                // 点击章节标题展开/收起段落
                 chapHeader.onclick = (e) => {
                     if (e.target === chapCheckbox) return;
                     const isCollapsed = paraList.classList.toggle('collapsed');
@@ -566,7 +533,6 @@
                     paraLabel.htmlFor = `para-${cIdx}-${pIdx}`;
                     const shortText = para.length > 25 ? para.substring(0, 25) + '...' : para;
                     paraLabel.textContent = `${pIdx + 1}. ${shortText}`;
-                    paraLabel.style.cursor = 'pointer';
 
                     paraItem.appendChild(paraCheckbox);
                     paraItem.appendChild(paraLabel);
@@ -582,10 +548,8 @@
             container.appendChild(bookDiv);
         }
 
-        // 章节全选/反选
         function toggleChapter(cIdx, isChecked) {
-            const checkboxes = document.querySelectorAll(`.p-check-${cIdx}`);
-            checkboxes.forEach(cb => cb.checked = isChecked);
+            document.querySelectorAll(`.p-check-${cIdx}`).forEach(cb => cb.checked = isChecked);
         }
 
         function updateChapterCheckbox(cIdx) {
@@ -595,32 +559,47 @@
         }
 
         function resetSelection() {
-            const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"]');
-            checkboxes.forEach(cb => cb.checked = false);
+            document.querySelectorAll('#tree-container input[type="checkbox"]').forEach(cb => cb.checked = false);
         }
 
-        // 3. 开始练习
+        // 3. 构建识字卡片池并开始练习
         function startPractice() {
-            selectedParagraphs = [];
+            charCardsQueue = [];
             const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
-            
+            const chineseCharRegex = /[\u4e00-\u9fa5]/;
+
             checkboxes.forEach(cb => {
                 if (cb.checked) {
                     const cIdx = cb.dataset.chapIndex;
                     const pIdx = cb.dataset.paraIndex;
-                    selectedParagraphs.push({
-                        chapterTitle: parsedData.chapters[cIdx].title,
-                        text: parsedData.chapters[cIdx].paragraphs[pIdx]
-                    });
+                    const chapterTitle = parsedData.chapters[cIdx].title;
+                    const text = parsedData.chapters[cIdx].paragraphs[pIdx];
+
+                    // 从该段落中挑取汉字生成单字卡片
+                    for (let i = 0; i < text.length; i++) {
+                        if (chineseCharRegex.test(text[i])) {
+                            charCardsQueue.push({
+                                char: text[i],
+                                chapterTitle: chapterTitle,
+                                fullText: text,
+                                charIndex: i
+                            });
+                        }
+                    }
                 }
             });
 
-            if (selectedParagraphs.length === 0) {
-                alert('请至少勾选一个段落！');
+            if (charCardsQueue.length === 0) {
+                alert('请至少勾选一个包含汉字的段落！');
                 return;
             }
 
-            practiceQueue = [...selectedParagraphs];
+            // 随机打乱卡片顺序（洗牌算法）
+            for (let i = charCardsQueue.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [charCardsQueue[i], charCardsQueue[j]] = [charCardsQueue[j], charCardsQueue[i]];
+            }
+
             currentIndex = 0;
             stats = { correct: 0, wrong: 0 };
 
@@ -630,49 +609,28 @@
             renderCurrentQuestion();
         }
 
-        // 4. 渲染题目：随机抽取汉字挖空
+        // 4. 渲染单字卡片
         function renderCurrentQuestion() {
-            if (currentIndex >= practiceQueue.length) {
-                alert(`练习完成！\n正确: ${stats.correct} 次\n错误: ${stats.wrong} 次`);
+            if (currentIndex >= charCardsQueue.length) {
+                alert(`抽卡识字完成！\n认识: ${stats.correct} 字\n不认识: ${stats.wrong} 字`);
                 backToSelect();
                 return;
             }
 
-            isAnswerRevealed = false;
-            const current = practiceQueue[currentIndex];
-            const originalText = current.text;
+            hideContext();
+            const card = charCardsQueue[currentIndex];
 
-            // 查找所有汉字的位置索引（排除标点符号、空格、英文字母及数字）
-            const chineseCharRegex = /[\u4e00-\u9fa5]/;
-            const validIndices = [];
+            document.getElementById('display-chapter').textContent = card.chapterTitle;
+            document.getElementById('display-char-card').textContent = card.char;
 
-            for (let i = 0; i < originalText.length; i++) {
-                if (chineseCharRegex.test(originalText[i])) {
-                    validIndices.push(i);
-                }
-            }
+            // 构建带有当前汉字高亮的上下文出处
+            const before = card.fullText.substring(0, card.charIndex);
+            const after = card.fullText.substring(card.charIndex + 1);
+            document.getElementById('display-context').innerHTML = 
+                `${escapeHtml(before)}<span class="highlight-char">${escapeHtml(card.char)}</span>${escapeHtml(after)}`;
 
-            document.getElementById('display-chapter').textContent = current.chapterTitle;
-
-            if (validIndices.length === 0) {
-                // 如果没有可挖空的汉字，直接展示原文
-                currentTargetChar = "";
-                document.getElementById('display-text').textContent = originalText;
-            } else {
-                // 随机抽取一个汉字索引
-                const randomIndex = validIndices[Math.floor(Math.random() * validIndices.length)];
-                currentTargetChar = originalText[randomIndex];
-
-                // 替换抽中的汉字为下划线挖空元素
-                const textBefore = originalText.substring(0, randomIndex);
-                const textAfter = originalText.substring(randomIndex + 1);
-
-                document.getElementById('display-text').innerHTML = 
-                    `${escapeHtml(textBefore)}<span id="blank-element" class="blank-char">&nbsp;?&nbsp;</span>${escapeHtml(textAfter)}`;
-            }
-
-            // 更新进度与统计
-            const total = practiceQueue.length;
+            // 更新进度
+            const total = charCardsQueue.length;
             const progress = (currentIndex / total) * 100;
             document.getElementById('progress-fill').style.width = `${progress}%`;
 
@@ -681,28 +639,19 @@
             document.getElementById('stat-remaining').textContent = total - currentIndex;
         }
 
-        // 切换答案显示状态
-        function toggleAnswer() {
-            const blankEl = document.getElementById('blank-element');
-            if (!blankEl || !currentTargetChar) return;
+        // 显示/隐藏出处上下文
+        function toggleContext() {
+            const contextEl = document.getElementById('display-context');
+            contextEl.classList.toggle('show');
+        }
 
-            if (!isAnswerRevealed) {
-                blankEl.textContent = currentTargetChar;
-                blankEl.classList.add('revealed-char');
-                isAnswerRevealed = true;
-            } else {
-                blankEl.innerHTML = '&nbsp;?&nbsp;';
-                blankEl.classList.remove('revealed-char');
-                isAnswerRevealed = false;
-            }
+        function hideContext() {
+            document.getElementById('display-context').classList.remove('show');
         }
 
         function recordAnswer(isCorrect) {
-            if (isCorrect) {
-                stats.correct++;
-            } else {
-                stats.wrong++;
-            }
+            if (isCorrect) stats.correct++;
+            else stats.wrong++;
             nextQuestion();
         }
 
@@ -716,7 +665,6 @@
             document.getElementById('page-select').classList.add('active');
         }
 
-        // 转义 HTML 字符防止注入
         function escapeHtml(text) {
             return text
                 .replace(/&/g, "&amp;")
