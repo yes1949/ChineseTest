@@ -1,469 +1,1674 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>识字练习系统</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f4f6f8;
-      color: #333;
-      padding: 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    }
-    h2 {
-      margin-bottom: 16px;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 8px;
-    }
-    .page {
-      display: none;
-    }
-    .page.active {
-      display: block;
-    }
-    nav {
-      margin-bottom: 20px;
-      display: flex;
-      gap: 12px;
-    }
-    nav button {
-      padding: 8px 16px;
-      border: none;
-      background: #e0e0e0;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    nav button.active {
-      background: #007aff;
-      color: #fff;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>抽卡认字</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    /* ================= 1. 修改：内容选择页样式 (层级缩进) ================= */
-    .chapter-item {
-      margin-bottom: 16px;
-    }
-    .chapter-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #1d1d1f;
-      margin-left: 0;         /* 章节名不缩进 */
-      padding-left: 8px;
-      border-left: 4px solid #007aff;
-    }
-    .sentence-list {
-      margin-top: 8px;
-      margin-left: 24px;      /* 修正：句子比章节名向右缩进 24px */
-    }
-    .sentence-item {
-      margin: 6px 0;
-      font-size: 15px;
-      color: #555;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f0f2f5;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px 0;
+            color: #333;
+            overflow: hidden;
+        }
 
-    /* ================= 2. 修改：数量选择控件与开始按钮 ================= */
-    .controls-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 24px;
-      padding-top: 16px;
-      border-top: 1px solid #eee;
-    }
-    .count-options {
-      display: flex;
-      gap: 8px;
-    }
-    .count-btn {
-      padding: 6px 14px;
-      border: 1px solid #ccc;
-      background: #fff;
-      border-radius: 20px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .count-btn.active {
-      background: #007aff;
-      color: #fff;
-      border-color: #007aff;
-      font-weight: bold;
-    }
-    .start-btn {
-      padding: 8px 24px;
-      background: #34c759;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .start-btn:hover {
-      background: #2ea34a;
-    }
+        /* 主容器 */
+        .app-card {
+            width: 100%;
+            max-width: 900px;
+            height: calc(100vh - 24px);
+            height: calc(100dvh - 24px);
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
 
-    /* ================= 4. 修改：统计页面卡片样式 ================= */
-    .card-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .card {
-      border: 1px solid #e5e5ea;
-      border-radius: 8px;
-      padding: 16px;
-      background: #fafafa;
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .card-title {
-      font-weight: bold;
-      font-size: 16px;
-    }
-    .card-action-btn {
-      padding: 4px 12px;
-      background: #007aff;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .card-action-btn.start-mode {
-      background: #34c759;
-    }
-    .char-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .char-box {
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background: #fff;
-      cursor: pointer;
-      user-select: none;
-      font-size: 16px;
-    }
-    /* 卡片内文字被选中时的样式 */
-    .char-box.selected {
-      background: #e3f2fd;
-      border-color: #007aff;
-      color: #007aff;
-      font-weight: bold;
-    }
+        @media (min-width: 768px) {
+            body { padding: 16px; }
+            .app-card {
+                height: 85vh;
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            }
+        }
 
-    /* 练习展示区域 */
-    .practice-area {
-      margin-top: 20px;
-      padding: 16px;
-      background: #f0f7ff;
-      border-radius: 8px;
-      display: none;
-    }
-    .practice-words {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .practice-char {
-      font-size: 20px;
-      padding: 6px 12px;
-      background: #fff;
-      border: 1px solid #007aff;
-      border-radius: 4px;
-      color: #007aff;
-    }
-  </style>
+        /* 底部导航栏 */
+        .nav-bar {
+            display: flex;
+            height: 56px;
+            background-color: #ffffff;
+            border-top: 1px solid #e0e0e0;
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #757575;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s;
+        }
+
+        .nav-item.active {
+            color: #3f51b5;
+            font-weight: bold;
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        /* 页面切换 */
+        .page {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+            height: calc(100% - 56px);
+            width: 100%;
+            padding: 14px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .page-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #1a237e;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e8eaf6;
+            margin-bottom: 10px;
+            flex-shrink: 0;
+        }
+
+        /* 第一页：内容选择页 */
+        .select-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 2px;
+        }
+
+        .ebbinghaus-card {
+            background: #fff5f5;
+            border: 1px solid #ffcdd2;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .ebbinghaus-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .ebbinghaus-title-red {
+            font-size: 1.05rem;
+            font-weight: bold;
+            color: #d32f2f;
+        }
+
+        .ebbinghaus-subtext {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .btn-green-rect {
+            background-color: #43a047;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 18px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 40px;
+        }
+
+        .btn-green-rect:active {
+            background-color: #388e3c;
+        }
+
+        /* 树状菜单布局：缩进对齐调整 */
+        .tree-container {
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px 12px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .book-header {
+            display: flex;
+            align-items: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #2c3e50;
+            padding: 8px 0;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-icon {
+            display: inline-block;
+            width: 18px;
+            text-align: center;
+            margin-right: 4px;
+            font-size: 0.8rem;
+            color: #5c6bc0;
+            flex-shrink: 0;
+        }
+
+        .chapter-item {
+            margin-bottom: 8px;
+            padding-left: 12px;
+        }
+
+        .chapter-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #3949ab;
+            cursor: pointer;
+            padding: 6px 0;
+        }
+
+        /* 修改1：句子与章节名对齐 */
+        .paragraph-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 4px;
+            padding-left: 24px; /* 保持与章节复选框及文字起始位置对齐 */
+        }
+
+        .collapsed { display: none !important; }
+
+        .paragraph-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: #555;
+            cursor: pointer;
+            line-height: 1.4;
+            padding: 2px 0;
+        }
+
+        .paragraph-item label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #7986cb;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        input[type="checkbox"]:checked {
+            background-color: #3f51b5;
+            border-color: #3f51b5;
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        /* 修改2：底栏按钮与六个数量选项样式 */
+        .bottom-action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            flex-shrink: 0;
+        }
+
+        .count-options-group {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+            overflow-x: auto;
+        }
+
+        .count-btn {
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 1px solid #c5cae9;
+            background-color: #f5f5f5;
+            color: #3f51b5;
+            border-radius: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .count-btn.active {
+            background-color: #3f51b5;
+            color: #ffffff;
+            border-color: #3f51b5;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .btn-primary { background-color: #3f51b5; color: white; }
+        .btn-secondary { background-color: #e0e0e0; color: #424242; }
+        .btn-danger { background-color: #e53935; color: white; }
+        .btn-success { background-color: #43a047; color: white; }
+
+        .btn-large {
+            height: 48px;
+            font-size: 1rem;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* 第二页：练习界面 */
+        .practice-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 10px;
+            position: relative;
+        }
+
+        .content-display {
+            flex: 1;
+            background-color: #f9fbe7;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .wrong-mode-banner {
+            color: #e53935;
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 4px;
+            display: none;
+        }
+
+        .chapter-tag {
+            font-size: 0.85rem;
+            color: #827717;
+            background-color: #f0f4c3;
+            padding: 3px 10px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        .single-char-card {
+            font-size: clamp(56px, 15vw, 90px);
+            font-weight: bold;
+            color: #1a237e;
+            background: #ffffff;
+            width: clamp(100px, 26vw, 150px);
+            height: clamp(100px, 26vw, 150px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border: 2px solid #c5cae9;
+            margin: 4px 0;
+            user-select: none;
+            transition: color 0.2s, border-color 0.2s;
+        }
+
+        .single-char-card.is-wrong-mode {
+            color: #e53935;
+            border-color: #ef9a9a;
+        }
+
+        .context-mask-area {
+            width: 100%;
+            max-width: 95%;
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px dashed #7986cb;
+            text-align: center;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .context-mask-tip {
+            font-size: 0.85rem;
+            color: #9e9e9e;
+            font-weight: bold;
+        }
+
+        .context-text {
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.5;
+            text-align: left;
+            display: none;
+        }
+
+        .highlight-char { color: #e53935; font-weight: bold; font-size: 1.15em; text-decoration: underline; }
+
+        .controls-area {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 6px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill { height: 100%; width: 0%; background-color: #3f51b5; transition: width 0.3s; }
+
+        .stats-board {
+            display: flex;
+            justify-content: space-around;
+            background-color: #f5f5f5;
+            padding: 6px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .stat-correct { color: #43a047; }
+        .stat-wrong { color: #e53935; }
+        .stat-total { color: #757575; }
+
+        .result-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 20px;
+        }
+
+        .result-card {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .result-card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .result-card.success .result-card-title { color: #2e7d32; }
+
+        .result-card-msg {
+            font-size: 0.95rem;
+            color: #424242;
+            line-height: 1.4;
+        }
+
+        .result-btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        /* 第三页：统计页样式 */
+        .stats-container {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-right: 2px;
+        }
+
+        .section-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #1a237e;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 修改4：卡片右侧练习/开始按钮 */
+        .btn-card-action {
+            background-color: #e8eaf6;
+            color: #3f51b5;
+            font-size: 0.75rem;
+            padding: 3px 10px;
+            border-radius: 12px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-card-action.start {
+            background-color: #43a047;
+            color: white;
+        }
+
+        .date-group {
+            margin-bottom: 8px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .date-header {
+            background-color: #f5f5f5;
+            padding: 6px 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .date-content {
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        /* 选中/取消选中的汉字气泡样式 */
+        .selectable-char {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .selectable-char.selected {
+            outline: 2px solid #3f51b5;
+            border-radius: 6px;
+            background-color: #e8eaf6 !important;
+        }
+
+        .selectable-char.unselected {
+            opacity: 0.4;
+        }
+
+        .history-item {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            background: #fafafa;
+            padding: 4px 8px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            min-width: 64px;
+        }
+
+        .history-item-top {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border-bottom: 1px dashed #e0e0e0;
+            padding-bottom: 2px;
+            margin-bottom: 2px;
+        }
+
+        .history-item-char {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #1a237e;
+        }
+
+        .score-correct { color: #43a047; }
+        .score-wrong { color: #e53935; }
+
+        .wrong-book-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            font-size: 0.95rem;
+            background-color: #ffebee;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #c62828;
+        }
+
+        .wrong-count-badge {
+            font-size: 0.7rem;
+            color: #e53935;
+            font-weight: bold;
+        }
+
+        .stat-row-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-row-item {
+            border: 1px solid #eee;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .stat-row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: #fafafa;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .stat-char-badge {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #1a237e;
+        }
+
+        .stat-detail-dates {
+            padding: 6px 10px;
+            background-color: #fff;
+            font-size: 0.75rem;
+            color: #666;
+            border-top: 1px dashed #eee;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .date-chip {
+            background-color: #f0f4c3;
+            color: #333;
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        .btn-more {
+            width: 100%;
+            padding: 6px;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 6px;
+            color: #555;
+            font-size: 0.8rem;
+            cursor: pointer;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .empty-tips {
+            font-size: 0.85rem;
+            color: #999;
+            text-align: center;
+            padding: 10px 0;
+        }
+    </style>
 </head>
 <body>
 
-  <div class="container">
-    <nav>
-      <button class="nav-btn active" onclick="switchPage('select-page')">内容选择页</button>
-      <button class="nav-btn" onclick="switchPage('stat-page')">统计页面</button>
-    </nav>
+    <div class="app-card">
+        <!-- 第一页：内容选择 -->
+        <div id="page-select" class="page active">
+            <div class="page-title">抽卡认字 - 内容选择</div>
+            
+            <div class="select-container">
+                <div class="ebbinghaus-card">
+                    <div class="ebbinghaus-left">
+                        <div class="ebbinghaus-title-red">错题复习</div>
+                        <div class="ebbinghaus-subtext" id="ebbinghaus-count">待复习：0字</div>
+                    </div>
+                    <button class="btn-green-rect" onclick="startEbbinghausPractice()">开始复习</button>
+                </div>
 
-    <!-- 页面 1：内容选择页 -->
-    <div id="select-page" class="page active">
-      <h2>内容选择</h2>
-      <div id="chapter-container">
-        <!-- 动态生成章节与句子，测试缩进 -->
-      </div>
+                <div id="tree-container" class="tree-container">
+                    <div style="text-align: center; color: #666; margin-top: 10px;">正在加载《论语》...</div>
+                </div>
+            </div>
 
-      <!-- 控件区：左侧 6 个选项，右侧开始按钮 -->
-      <div class="controls-bar">
-        <div class="count-options">
-          <button class="count-btn" data-value="10" onclick="selectCount(this)">10</button>
-          <button class="count-btn" data-value="20" onclick="selectCount(this)">20</button>
-          <button class="count-btn" data-value="30" onclick="selectCount(this)">30</button>
-          <button class="count-btn" data-value="40" onclick="selectCount(this)">40</button>
-          <button class="count-btn" data-value="50" onclick="selectCount(this)">50</button>
-          <button class="count-btn active" data-value="所有" onclick="selectCount(this)">所有</button>
+            <!-- 修改2：删除重置勾选，改写底栏为 6个数量选项 + 开始练习按钮 -->
+            <div class="bottom-action-bar">
+                <div class="count-options-group">
+                    <button class="count-btn" onclick="selectCountOption(10, this)">10</button>
+                    <button class="count-btn" onclick="selectCountOption(20, this)">20</button>
+                    <button class="count-btn" onclick="selectCountOption(30, this)">30</button>
+                    <button class="count-btn" onclick="selectCountOption(40, this)">40</button>
+                    <button class="count-btn" onclick="selectCountOption(50, this)">50</button>
+                    <button class="count-btn active" onclick="selectCountOption('all', this)">所有</button>
+                </div>
+                <button class="btn btn-primary" onclick="startPractice()">开始练习</button>
+            </div>
         </div>
-        <button class="start-btn" onclick="startPracticeFromSelect()">开始练习</button>
-      </div>
+
+        <!-- 第二页：练习 -->
+        <div id="page-practice" class="page">
+            <div class="practice-container">
+                <div class="content-display">
+                    <div id="wrong-mode-banner" class="wrong-mode-banner">错题练习 1/1</div>
+                    <div id="display-chapter" class="chapter-tag">章节名称</div>
+                    <div id="display-char-card" class="single-char-card">字</div>
+                    
+                    <div class="context-mask-area" onclick="toggleContextMask()">
+                        <div id="context-tip" class="context-mask-tip">点击查看出处</div>
+                        <div id="display-context" class="context-text"></div>
+                    </div>
+                </div>
+
+                <div class="controls-area">
+                    <div class="progress-bar-container">
+                        <div id="progress-fill" class="progress-bar-fill"></div>
+                    </div>
+
+                    <div class="stats-board">
+                        <div>正确: <span id="stat-correct" class="stat-correct">0</span></div>
+                        <div>错误: <span id="stat-wrong" class="stat-wrong">0</span></div>
+                        <div>剩余卡片: <span id="stat-remaining" class="stat-total">0</span></div>
+                    </div>
+
+                    <div class="action-row" style="display:flex; gap:12px;">
+                        <button class="btn btn-danger btn-large" style="flex:1;" onclick="recordAnswer(false)">不认识 (✕)</button>
+                        <button class="btn btn-success btn-large" style="flex:1;" onclick="recordAnswer(true)">认识 (✓)</button>
+                    </div>
+                </div>
+
+                <div id="result-overlay" class="result-overlay">
+                    <div id="result-card" class="result-card">
+                        <div id="result-title" class="result-card-title">练习完成</div>
+                        <div id="result-msg" class="result-card-msg"></div>
+                        <div class="result-btn-group">
+                            <button id="result-primary-btn" class="btn btn-primary" style="flex:1;" onclick="retryLastPractice()">再练一次</button>
+                            <button class="btn btn-secondary" style="flex:1;" onclick="goToContentSelect()">选择内容</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 第三页：统计 -->
+        <div id="page-stats" class="page">
+            <div class="page-title">学习数据统计</div>
+            <div class="stats-container">
+                <!-- 修改4：增加卡片级练习/开始联动 -->
+                <div class="section-card">
+                    <div class="section-title">
+                        <span>学习历程</span>
+                        <button id="btn-practice-history" class="btn-card-action" onclick="toggleCardPracticeMode('history')">练习</button>
+                    </div>
+                    <div id="history-container"></div>
+                    <button id="btn-history-more" class="btn-more" onclick="showAllHistory()" style="display:none;">查看更多日期</button>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">
+                        <span>错题本</span>
+                        <button id="btn-practice-wrong" class="btn-card-action" onclick="toggleCardPracticeMode('wrong')">练习</button>
+                    </div>
+                    <div id="wrong-book-container"></div>
+                    <button id="btn-wrong-more" class="btn-more" onclick="showAllWrongBook()" style="display:none;">查看更多日期</button>
+                </div>
+
+                <div class="section-card">
+                    <div class="section-title">
+                        <span>错字统计（按错误频次）</span>
+                        <button id="btn-practice-stat" class="btn-card-action" onclick="toggleCardPracticeMode('stat')">练习</button>
+                    </div>
+                    <div id="stat-char-container" class="stat-row-list"></div>
+                    <button id="btn-stat-more" class="btn-more" onclick="showAllStatChars()" style="display:none;">查看更多高频错字</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部导航栏 -->
+        <div class="nav-bar">
+            <div id="nav-select" class="nav-item active" onclick="switchNav('select')">
+                <div class="nav-icon">📚</div>
+                <div>内容选择</div>
+            </div>
+            <div id="nav-practice" class="nav-item" onclick="switchNav('practice')">
+                <div class="nav-icon">🎴</div>
+                <div>练习</div>
+            </div>
+            <div id="nav-stats" class="nav-item" onclick="switchNav('stats')">
+                <div class="nav-icon">📊</div>
+                <div>统计</div>
+            </div>
+        </div>
     </div>
 
-    <!-- 页面 2：统计页面 -->
-    <div id="stat-page" class="page">
-      <h2>错字 / 掌握度统计</h2>
-      <div class="card-list" id="card-list-container">
-        <!-- 动态生成统计卡片 -->
-      </div>
-    </div>
+    <script>
+        let parsedData = { book: "论语", chapters: [] };
+        let initialCardsQueue = []; 
+        let charCardsQueue = [];    
+        let currentIndex = 0;
+        let stats = { correct: 0, wrong: 0 };
+        let currentSessionDetails = {};
+        let firstRoundStats = { correct: 0, wrong: 0 };
+        let isContextRevealed = false;
 
-    <!-- 练习预览展示区（模拟进入练习） -->
-    <div id="practice-display" class="practice-area">
-      <h3>当前出题列表（已自动去重，共 <span id="practice-count">0</span> 字）：</h3>
-      <div id="practice-words" class="practice-words"></div>
-    </div>
-  </div>
+        let isWrongMode = false;
+        let wrongTotalCount = 0;
 
-  <script>
-    // 1. 模拟数据：章节与句子
-    const chapterData = [
-      {
-        title: "第一章：基础汉字练习",
-        sentences: [
-          "天地玄黄，宇宙洪荒。",
-          "日月盈昃，辰宿列张。"
-        ]
-      },
-      {
-        title: "第二章：进阶词汇训练",
-        sentences: [
-          "寒来暑往，秋收冬藏。",
-          "闰余成岁，律吕调阳。"
-        ]
-      }
-    ];
+        let selectedLimit = 'all'; // 当前选中的题目上限
 
-    // 模拟统计卡片数据
-    const statCardsData = [
-      { id: 1, title: "高频错字集", chars: ["玄", "黄", "洪", "荒", "盈", "昃", "宿"] },
-      { id: 2, title: "待复习字词", chars: ["寒", "暑", "收", "藏", "岁", "阳", "黄", "洪"] }
-    ];
+        let showAllHistoryDates = false;
+        let showAllWrongDates = false;
+        let showAllStatRows = false;
 
-    let selectedCountValue = "所有"; // 默认选中"所有"
+        // 统计卡片选中状态记录
+        let cardSelectionState = {
+            history: { active: false, selectedChars: new Set() },
+            wrong: { active: false, selectedChars: new Set() },
+            stat: { active: false, selectedChars: new Set() }
+        };
 
-    // 页面初始化
-    window.onload = function() {
-      renderSelectPage();
-      renderStatPage();
-    };
-
-    // 切换 Tab 页
-    function switchPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-      event.target.classList.add('active');
-      document.getElementById('practice-display').style.display = 'none';
-    }
-
-    // ================= 1. 内容选择页渲染 (解决缩进问题) =================
-    function renderSelectPage() {
-      const container = document.getElementById('chapter-container');
-      container.innerHTML = '';
-
-      chapterData.forEach((ch, chIdx) => {
-        const chDiv = document.createElement('div');
-        chDiv.className = 'chapter-item';
-
-        // 章节名
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'chapter-title';
-        titleDiv.innerText = ch.title;
-        chDiv.appendChild(titleDiv);
-
-        // 句子列表 (比章节名缩进)
-        const sentenceList = document.createElement('div');
-        sentenceList.className = 'sentence-list';
-
-        ch.sentences.forEach((sent, sIdx) => {
-          const sentDiv = document.createElement('div');
-          sentDiv.className = 'sentence-item';
-          
-          const checkbox = document.createElement('input');
-          checkbox.type = 'checkbox';
-          checkbox.checked = true; // 默认选中
-          checkbox.className = 'select-sentence-cb';
-          checkbox.dataset.text = sent;
-
-          const label = document.createElement('label');
-          label.innerText = sent;
-
-          sentDiv.appendChild(checkbox);
-          sentDiv.appendChild(label);
-          sentenceList.appendChild(sentDiv);
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchLunyuText();
+            updateEbbinghausCount();
         });
 
-        chDiv.appendChild(sentenceList);
-        container.appendChild(chDiv);
-      });
-    }
+        function switchNav(target) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
 
-    // ================= 2. 数量选择逻辑 =================
-    function selectCount(btnElement) {
-      document.querySelectorAll('.count-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
-      selectedCountValue = btnElement.dataset.value;
-    }
+            document.getElementById(`nav-${target}`).classList.add('active');
+            document.getElementById(`page-${target}`).classList.add('active');
 
-    // 从内容选择页开始练习
-    function startPracticeFromSelect() {
-      const checkboxes = document.querySelectorAll('.select-sentence-cb:checked');
-      let combinedText = '';
-      checkboxes.forEach(cb => {
-        combinedText += cb.dataset.text;
-      });
+            if (target === 'stats') {
+                renderStatisticsPage();
+            } else if (target === 'select') {
+                updateEbbinghausCount();
+            }
+        }
 
-      // 执行出题（去重与限制数量）
-      generatePractice(combinedText, selectedCountValue);
-    }
+        async function fetchLunyuText() {
+            const container = document.getElementById('tree-container');
+            try {
+                const response = await fetch(`lunyu.txt?v=${new Date().getTime()}`);
+                if (!response.ok) throw new Error(`状态码: ${response.status}`);
+                const text = await response.text();
+                parseLunyuFormat(text);
+                renderSelectionTree();
+            } catch (err) {
+                container.innerHTML = `<div style="color:#e53935; text-align:center;">读取 lunyu.txt 失败！请确保文件存在。</div>`;
+            }
+        }
 
-    // ================= 3. 核心出题与去重逻辑 =================
-    function generatePractice(textString, countLimit) {
-      // 过滤非中文字符/标点符号，仅保留字符
-      const rawChars = textString.replace(/[^\u4e00-\u9fa5]/g, '').split('');
+        function parseLunyuFormat(rawText) {
+            const bookMatch = rawText.match(/<book>(.*?)<\/book>/s);
+            if (bookMatch) parsedData.book = bookMatch[1].trim();
 
-      // 【核心修改 3】：同一字只出现一次 (Set 去重)
-      const uniqueChars = Array.from(new Set(rawChars));
+            const contentMatch = rawText.match(/<content>([\s\S]*?)<\/content>/s);
+            const contentText = contentMatch ? contentMatch[1] : rawText;
 
-      // 根据选中的数字限制题目数量
-      let finalChars = uniqueChars;
-      if (countLimit !== '所有') {
-        const limit = parseInt(countLimit, 10);
-        finalChars = uniqueChars.slice(0, limit);
-      }
+            const lines = contentText.split('\n');
+            let currentChapter = null;
 
-      // 展示出题结果
-      displayPracticeResult(finalChars);
-    }
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) return;
+                if (/^[\u4e00-\u9fa5]+第[一二三四五六七八九十]+$/.test(trimmed)) {
+                    currentChapter = { title: trimmed, paragraphs: [] };
+                    parsedData.chapters.push(currentChapter);
+                } else if (currentChapter) {
+                    currentChapter.paragraphs.push(trimmed);
+                }
+            });
+        }
 
-    // 展示练习题目的通用函数
-    function displayPracticeResult(charList) {
-      const displayArea = document.getElementById('practice-display');
-      const wordsContainer = document.getElementById('practice-words');
-      const countSpan = document.getElementById('practice-count');
+        /* 修改1：调整目录结构树，使章节和句子的边距严格对齐 */
+        function renderSelectionTree() {
+            const container = document.getElementById('tree-container');
+            container.innerHTML = '';
 
-      wordsContainer.innerHTML = '';
-      countSpan.innerText = charList.length;
+            const bookDiv = document.createElement('div');
+            
+            const bookHeader = document.createElement('div');
+            bookHeader.className = 'book-header';
+            bookHeader.innerHTML = `<span class="toggle-icon" id="book-icon">▼</span><span>《${parsedData.book}》</span>`;
+            
+            const chapterList = document.createElement('div');
+            chapterList.className = '';
 
-      if (charList.length === 0) {
-        wordsContainer.innerHTML = '<span style="color:#999;">未选中任何汉字</span>';
-      } else {
-        charList.forEach(char => {
-          const charSpan = document.createElement('span');
-          charSpan.className = 'practice-char';
-          charSpan.innerText = char;
-          wordsContainer.appendChild(charSpan);
-        });
-      }
+            bookHeader.onclick = () => {
+                const isCollapsed = chapterList.classList.toggle('collapsed');
+                document.getElementById('book-icon').textContent = isCollapsed ? '▶' : '▼';
+            };
 
-      displayArea.style.display = 'block';
-      displayArea.scrollIntoView({ behavior: 'smooth' });
-    }
+            bookDiv.appendChild(bookHeader);
 
-    // ================= 4. 统计页面卡片与按钮交互 =================
-    function renderStatPage() {
-      const container = document.getElementById('card-list-container');
-      container.innerHTML = '';
+            parsedData.chapters.forEach((chap, cIdx) => {
+                const chapDiv = document.createElement('div');
+                chapDiv.className = 'chapter-item';
 
-      statCardsData.forEach(cardData => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.dataset.id = cardData.id;
+                const chapHeader = document.createElement('div');
+                chapHeader.className = 'chapter-header';
 
-        // 卡片头部（标题 + 练习/开始按钮）
-        const header = document.createElement('div');
-        header.className = 'card-header';
+                const toggleIcon = document.createElement('span');
+                toggleIcon.className = 'toggle-icon';
+                toggleIcon.textContent = '▼';
 
-        const title = document.createElement('div');
-        title.className = 'card-title';
-        title.innerText = cardData.title;
+                const chapCheckbox = document.createElement('input');
+                chapCheckbox.type = 'checkbox';
+                chapCheckbox.id = `chap-${cIdx}`;
+                chapCheckbox.onclick = (e) => e.stopPropagation();
+                chapCheckbox.onchange = (e) => toggleChapter(cIdx, e.target.checked);
 
-        const actionBtn = document.createElement('button');
-        actionBtn.className = 'card-action-btn';
-        actionBtn.innerText = '练习'; // 初始为“练习”
-        actionBtn.onclick = () => handleCardAction(card, actionBtn);
+                const chapLabel = document.createElement('span');
+                chapLabel.textContent = chap.title;
 
-        header.appendChild(title);
-        header.appendChild(actionBtn);
-        card.appendChild(header);
+                chapHeader.appendChild(toggleIcon);
+                chapHeader.appendChild(chapCheckbox);
+                chapHeader.appendChild(chapLabel);
 
-        // 卡片内的字阵列
-        const charGrid = document.createElement('div');
-        charGrid.className = 'char-grid';
+                const paraList = document.createElement('div');
+                paraList.className = 'paragraph-list';
 
-        cardData.chars.forEach(char => {
-          const charBox = document.createElement('div');
-          charBox.className = 'char-box';
-          charBox.innerText = char;
+                chapHeader.onclick = (e) => {
+                    if (e.target === chapCheckbox) return;
+                    const isCollapsed = paraList.classList.toggle('collapsed');
+                    toggleIcon.textContent = isCollapsed ? '▶' : '▼';
+                };
 
-          // 点击单字：可取消/再次选中
-          charBox.onclick = () => {
-            charBox.classList.toggle('selected');
-          };
+                chap.paragraphs.forEach((para, pIdx) => {
+                    const paraItem = document.createElement('div');
+                    paraItem.className = 'paragraph-item';
 
-          charGrid.appendChild(charBox);
-        });
+                    const paraCheckbox = document.createElement('input');
+                    paraCheckbox.type = 'checkbox';
+                    paraCheckbox.id = `para-${cIdx}-${pIdx}`;
+                    paraCheckbox.className = `p-check-${cIdx}`;
+                    paraCheckbox.dataset.chapIndex = cIdx;
+                    paraCheckbox.dataset.paraIndex = pIdx;
+                    paraCheckbox.onchange = () => updateChapterCheckbox(cIdx);
 
-        card.appendChild(charGrid);
-        container.appendChild(card);
-      });
-    }
+                    const paraLabel = document.createElement('label');
+                    paraLabel.htmlFor = `para-${cIdx}-${pIdx}`;
+                    const shortText = para.length > 22 ? para.substring(0, 22) + '...' : para;
+                    paraLabel.textContent = `${pIdx + 1}. ${shortText}`;
 
-    // 卡片内按钮交互处理（练习 <-> 开始）
-    function handleCardAction(cardElement, btnElement) {
-      const charBoxes = cardElement.querySelectorAll('.char-box');
+                    paraItem.appendChild(paraCheckbox);
+                    paraItem.appendChild(paraLabel);
+                    paraList.appendChild(paraItem);
+                });
 
-      // 状态一：当前为“练习”，点击后全选文字并变为“开始”
-      if (btnElement.innerText === '练习') {
-        charBoxes.forEach(box => box.classList.add('selected')); // 选中卡片内所有文字
-        btnElement.innerText = '开始';                           // 变为开始按钮
-        btnElement.classList.add('start-mode');
-      } 
-      // 状态二：当前为“开始”，点击后收集选中的字进行练习
-      else {
-        const selectedBoxes = cardElement.querySelectorAll('.char-box.selected');
-        let selectedText = '';
-        selectedBoxes.forEach(box => {
-          selectedText += box.innerText;
-        });
+                chapDiv.appendChild(chapHeader);
+                chapDiv.appendChild(paraList);
+                chapterList.appendChild(chapDiv);
+            });
 
-        // 提交练习（触发自动去重）
-        generatePractice(selectedText, '所有');
-      }
-    }
-  </script>
+            bookDiv.appendChild(chapterList);
+            container.appendChild(bookDiv);
+        }
+
+        function toggleChapter(cIdx, isChecked) {
+            document.querySelectorAll(`.p-check-${cIdx}`).forEach(cb => cb.checked = isChecked);
+        }
+
+        function updateChapterCheckbox(cIdx) {
+            const chapCb = document.getElementById(`chap-${cIdx}`);
+            const checkboxes = Array.from(document.querySelectorAll(`.p-check-${cIdx}`));
+            chapCb.checked = checkboxes.every(cb => cb.checked);
+        }
+
+        /* 修改2：选择数量按钮事件 */
+        function selectCountOption(value, btnEl) {
+            selectedLimit = value;
+            document.querySelectorAll('.count-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+        }
+
+        function getEbbinghausWrongChars() {
+            const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
+            const todayStr = getTodayDateStr();
+            const todayDate = new Date(todayStr);
+
+            const intervals = [1, 2, 4, 7, 15, 30]; 
+            let targetCharSet = new Set();
+
+            for (let dateStr in historyData) {
+                const recordDate = new Date(dateStr);
+                const diffTime = Math.abs(todayDate - recordDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (intervals.includes(diffDays)) {
+                    for (let char in historyData[dateStr]) {
+                        if (historyData[dateStr][char].wrong > 0) {
+                            targetCharSet.add(char);
+                        }
+                    }
+                }
+            }
+
+            return Array.from(targetCharSet);
+        }
+
+        function updateEbbinghausCount() {
+            const wrongChars = getEbbinghausWrongChars();
+            document.getElementById('ebbinghaus-count').textContent = `待复习：${wrongChars.length}字`;
+        }
+
+        function startEbbinghausPractice() {
+            const wrongChars = getEbbinghausWrongChars();
+            if (wrongChars.length === 0) {
+                alert('今天暂无符合艾宾浩斯复习节点的错字！去自选章节练习吧~');
+                return;
+            }
+
+            let cards = [];
+            let seenChars = new Set(); // 修改3：去重逻辑
+            const chineseCharRegex = /[\u4e00-\u9fa5]/;
+
+            parsedData.chapters.forEach(chap => {
+                chap.paragraphs.forEach(text => {
+                    for (let i = 0; i < text.length; i++) {
+                        const c = text[i];
+                        if (wrongChars.includes(c) && chineseCharRegex.test(c) && !seenChars.has(c)) {
+                            seenChars.add(c);
+                            cards.push({
+                                char: c,
+                                chapterTitle: chap.title,
+                                fullText: text,
+                                charIndex: i
+                            });
+                        }
+                    }
+                });
+            });
+
+            // 修改2：如果设置了题目限制数量
+            if (selectedLimit !== 'all' && typeof selectedLimit === 'number') {
+                cards = cards.slice(0, selectedLimit);
+            }
+
+            startQueuePractice(cards, false);
+        }
+
+        /* 修改2 & 修改3：生成自选练习卡片队列（带去重） */
+        function startPractice() {
+            let cards = [];
+            let seenChars = new Set();
+            const checkboxes = document.querySelectorAll('#tree-container input[type="checkbox"][id^="para-"]');
+            const chineseCharRegex = /[\u4e00-\u9fa5]/;
+
+            checkboxes.forEach(cb => {
+                if (cb.checked) {
+                    const cIdx = cb.dataset.chapIndex;
+                    const pIdx = cb.dataset.paraIndex;
+                    const chapterTitle = parsedData.chapters[cIdx].title;
+                    const text = parsedData.chapters[cIdx].paragraphs[pIdx];
+
+                    for (let i = 0; i < text.length; i++) {
+                        const c = text[i];
+                        if (chineseCharRegex.test(c) && !seenChars.has(c)) { // 修改3：汉字只出现一次
+                            seenChars.add(c);
+                            cards.push({
+                                char: c,
+                                chapterTitle: chapterTitle,
+                                fullText: text,
+                                charIndex: i
+                            });
+                        }
+                    }
+                }
+            });
+
+            if (cards.length === 0) {
+                alert('请至少勾选一个包含汉字的段落！');
+                return;
+            }
+
+            // 修改2：打乱后再截取选中数量的题目
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+
+            if (selectedLimit !== 'all' && typeof selectedLimit === 'number') {
+                cards = cards.slice(0, selectedLimit);
+            }
+
+            startQueuePractice(cards, false);
+        }
+
+        function startQueuePractice(cards, isWrongLoop = false, totalWrong = 0) {
+            document.getElementById('result-overlay').style.display = 'none';
+
+            isWrongMode = isWrongLoop;
+            wrongTotalCount = totalWrong;
+
+            if (!isWrongLoop) {
+                initialCardsQueue = [...cards];
+                firstRoundStats = { correct: 0, wrong: 0 };
+            }
+
+            charCardsQueue = [...cards];
+
+            // 若不需要截取，再次洗牌
+            if (isWrongLoop) {
+                for (let i = charCardsQueue.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [charCardsQueue[i], charCardsQueue[j]] = [charCardsQueue[j], charCardsQueue[i]];
+                }
+            }
+
+            currentIndex = 0;
+            stats = { correct: 0, wrong: 0 };
+            currentSessionDetails = {};
+
+            switchNav('practice');
+            renderCurrentQuestion();
+        }
+
+        function renderCurrentQuestion() {
+            if (currentIndex >= charCardsQueue.length) {
+                savePracticeSession(currentSessionDetails);
+
+                let wrongCards = [];
+                for (let char in currentSessionDetails) {
+                    if (currentSessionDetails[char].wrong > 0) {
+                        wrongCards.push(currentSessionDetails[char].cardRef);
+                    }
+                }
+
+                if (wrongCards.length > 0) {
+                    startQueuePractice(wrongCards, true, wrongCards.length);
+                    return;
+                }
+
+                showPracticeResultModal();
+                return;
+            }
+
+            resetContextMask();
+            const card = charCardsQueue[currentIndex];
+
+            const wrongBanner = document.getElementById('wrong-mode-banner');
+            const charCardEl = document.getElementById('display-char-card');
+
+            if (isWrongMode) {
+                wrongBanner.style.display = 'block';
+                wrongBanner.textContent = `错题练习 ${currentIndex + 1}/${wrongTotalCount}`;
+                charCardEl.classList.add('is-wrong-mode');
+            } else {
+                wrongBanner.style.display = 'none';
+                charCardEl.classList.remove('is-wrong-mode');
+            }
+
+            document.getElementById('display-chapter').textContent = card.chapterTitle;
+            charCardEl.textContent = card.char;
+
+            const before = card.fullText.substring(0, card.charIndex);
+            const after = card.fullText.substring(card.charIndex + 1);
+            document.getElementById('display-context').innerHTML = 
+                `${escapeHtml(before)}<span class="highlight-char">${escapeHtml(card.char)}</span>${escapeHtml(after)}`;
+
+            const total = charCardsQueue.length;
+            const progress = (currentIndex / total) * 100;
+            document.getElementById('progress-fill').style.width = `${progress}%`;
+
+            document.getElementById('stat-correct').textContent = stats.correct;
+            document.getElementById('stat-wrong').textContent = stats.wrong;
+            document.getElementById('stat-remaining').textContent = total - currentIndex;
+        }
+
+        function toggleContextMask() {
+            const tipEl = document.getElementById('context-tip');
+            const contextEl = document.getElementById('display-context');
+
+            isContextRevealed = !isContextRevealed;
+
+            if (isContextRevealed) {
+                tipEl.style.display = 'none';
+                contextEl.style.display = 'block';
+            } else {
+                tipEl.style.display = 'block';
+                contextEl.style.display = 'none';
+            }
+        }
+
+        function resetContextMask() {
+            isContextRevealed = false;
+            document.getElementById('context-tip').style.display = 'block';
+            document.getElementById('display-context').style.display = 'none';
+        }
+
+        function recordAnswer(isCorrect) {
+            const card = charCardsQueue[currentIndex];
+            const char = card.char;
+
+            if (!currentSessionDetails[char]) {
+                currentSessionDetails[char] = { correct: 0, wrong: 0, cardRef: card };
+            }
+
+            if (isCorrect) {
+                stats.correct++;
+                currentSessionDetails[char].correct++;
+                if (!isWrongMode) firstRoundStats.correct++;
+            } else {
+                stats.wrong++;
+                currentSessionDetails[char].wrong++;
+                if (!isWrongMode) firstRoundStats.wrong++;
+            }
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            renderCurrentQuestion();
+        }
+
+        function showPracticeResultModal() {
+            const overlay = document.getElementById('result-overlay');
+            const card = document.getElementById('result-card');
+            const titleEl = document.getElementById('result-title');
+            const msgEl = document.getElementById('result-msg');
+
+            card.className = 'result-card success';
+            titleEl.textContent = '🎉 全部消除完成！';
+            
+            if (firstRoundStats.wrong > 0) {
+                msgEl.textContent = `正常轮次表现：正确 ${firstRoundStats.correct}，错误 ${firstRoundStats.wrong}。经过错题强化，目前已全部消除答对！`;
+            } else {
+                msgEl.textContent = `正常轮次表现：正确 ${firstRoundStats.correct}，错误 ${firstRoundStats.wrong}。太棒了，一次全对！`;
+            }
+
+            overlay.style.display = 'flex';
+        }
+
+        function retryLastPractice() {
+            if (initialCardsQueue.length > 0) {
+                startQueuePractice(initialCardsQueue, false);
+            } else {
+                goToContentSelect();
+            }
+        }
+
+        function goToContentSelect() {
+            document.getElementById('result-overlay').style.display = 'none';
+            switchNav('select');
+        }
+
+        function savePracticeSession(sessionDetailsToSave) {
+            if (!sessionDetailsToSave || Object.keys(sessionDetailsToSave).length === 0) return;
+
+            const today = getTodayDateStr();
+            let historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
+
+            if (!historyData[today]) {
+                historyData[today] = {};
+            }
+
+            for (let char in sessionDetailsToSave) {
+                if (!historyData[today][char]) {
+                    historyData[today][char] = { correct: 0, wrong: 0 };
+                }
+                historyData[today][char].correct += sessionDetailsToSave[char].correct;
+                historyData[today][char].wrong += sessionDetailsToSave[char].wrong;
+            }
+
+            localStorage.setItem('lunyu_history_data', JSON.stringify(historyData));
+        }
+
+        function getTodayDateStr() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function renderStatisticsPage() {
+            const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
+            const dates = Object.keys(historyData).sort().reverse();
+
+            renderLearningHistory(historyData, dates);
+            renderWrongBook(historyData, dates);
+            renderStatChars(historyData);
+        }
+
+        /* 修改4：统计卡片练习联动功能实现 */
+        function toggleCardPracticeMode(type) {
+            const btnMap = {
+                history: 'btn-practice-history',
+                wrong: 'btn-practice-wrong',
+                stat: 'btn-practice-stat'
+            };
+            const btn = document.getElementById(btnMap[type]);
+            const state = cardSelectionState[type];
+
+            if (!state.active) {
+                state.active = true;
+                btn.textContent = '开始';
+                btn.classList.add('start');
+                
+                // 收集并全选当前卡片可见的全部汉字
+                const chars = getCardChars(type);
+                state.selectedChars = new Set(chars);
+            } else {
+                if (state.selectedChars.size === 0) {
+                    alert('请至少选择一个文字进行练习！');
+                    return;
+                }
+                // 启动选中汉字的专项练习
+                startCustomCharSetPractice(Array.from(state.selectedChars));
+                // 恢复按钮初始状态
+                state.active = false;
+                btn.textContent = '练习';
+                btn.classList.remove('start');
+            }
+
+            renderStatisticsPage();
+        }
+
+        function getCardChars(type) {
+            const historyData = JSON.parse(localStorage.getItem('lunyu_history_data')) || {};
+            let charSet = new Set();
+
+            if (type === 'history') {
+                for (let date in historyData) {
+                    for (let c in historyData[date]) charSet.add(c);
+                }
+            } else if (type === 'wrong') {
+                for (let date in historyData) {
+                    for (let c in historyData[date]) {
+                        if (historyData[date][c].wrong > 0) charSet.add(c);
+                    }
+                }
+            } else if (type === 'stat') {
+                for (let date in historyData) {
+                    for (let c in historyData[date]) {
+                        if (historyData[date][c].wrong > 0) charSet.add(c);
+                    }
+                }
+            }
+            return Array.from(charSet);
+        }
+
+        function toggleCharSelection(type, char, event) {
+            if (event) event.stopPropagation();
+            const state = cardSelectionState[type];
+            if (!state.active) return;
+
+            if (state.selectedChars.has(char)) {
+                state.selectedChars.delete(char);
+            } else {
+                state.selectedChars.add(char);
+            }
+            renderStatisticsPage();
+        }
+
+        function startCustomCharSetPractice(charArray) {
+            let cards = [];
+            let seenChars = new Set();
+            const chineseCharRegex = /[\u4e00-\u9fa5]/;
+
+            parsedData.chapters.forEach(chap => {
+                chap.paragraphs.forEach(text => {
+                    for (let i = 0; i < text.length; i++) {
+                        const c = text[i];
+                        if (charArray.includes(c) && chineseCharRegex.test(c) && !seenChars.has(c)) {
+                            seenChars.add(c);
+                            cards.push({
+                                char: c,
+                                chapterTitle: chap.title,
+                                fullText: text,
+                                charIndex: i
+                            });
+                        }
+                    }
+                });
+            });
+
+            if (cards.length === 0) {
+                alert('未找到选中字符的出处上下文！');
+                return;
+            }
+
+            startQueuePractice(cards, false);
+        }
+
+        function renderLearningHistory(historyData, dates) {
+            const container = document.getElementById('history-container');
+            const moreBtn = document.getElementById('btn-history-more');
+            const state = cardSelectionState.history;
+            container.innerHTML = '';
+
+            if (dates.length === 0) {
+                container.innerHTML = '<div class="empty-tips">暂无学习记录</div>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            const today = getTodayDateStr();
+            const displayDates = showAllHistoryDates ? dates : dates.slice(0, 5);
+
+            displayDates.forEach(date => {
+                const group = document.createElement('div');
+                group.className = 'date-group';
+
+                const isToday = (date === today);
+                
+                const header = document.createElement('div');
+                header.className = 'date-header';
+                header.innerHTML = `<span>${date} ${isToday ? '(今天)' : ''}</span><span id="hist-icon-${date}">${isToday ? '▲' : '▼'}</span>`;
+
+                const content = document.createElement('div');
+                content.className = `date-content ${isToday ? '' : 'collapsed'}`;
+                content.id = `hist-content-${date}`;
+
+                header.onclick = () => {
+                    const isCollapsed = content.classList.toggle('collapsed');
+                    document.getElementById(`hist-icon-${date}`).textContent = isCollapsed ? '▼' : '▲';
+                };
+
+                const charObj = historyData[date];
+                for (let char in charObj) {
+                    const n = charObj[char].correct;
+                    const m = charObj[char].wrong;
+
+                    const item = document.createElement('div');
+                    let classList = "history-item selectable-char";
+                    if (state.active) {
+                        classList += state.selectedChars.has(char) ? " selected" : " unselected";
+                    }
+
+                    item.className = classList;
+                    item.onclick = (e) => toggleCharSelection('history', char, e);
+
+                    item.innerHTML = `
+                        <div class="history-item-top">
+                            <span class="score-correct">正确:${n}</span>
+                            <span class="score-wrong">错误:${m}</span>
+                        </div>
+                        <div class="history-item-char">${char}</div>
+                    `;
+                    content.appendChild(item);
+                }
+
+                group.appendChild(header);
+                group.appendChild(content);
+                container.appendChild(group);
+            });
+
+            moreBtn.style.display = dates.length > 5 && !showAllHistoryDates ? 'block' : 'none';
+        }
+
+        function showAllHistory() {
+            showAllHistoryDates = true;
+            renderStatisticsPage();
+        }
+
+        function renderWrongBook(historyData, dates) {
+            const container = document.getElementById('wrong-book-container');
+            const moreBtn = document.getElementById('btn-wrong-more');
+            const state = cardSelectionState.wrong;
+            container.innerHTML = '';
+
+            const wrongDates = dates.filter(date => {
+                const charObj = historyData[date];
+                return Object.keys(charObj).some(c => charObj[c].wrong > 0);
+            });
+
+            if (wrongDates.length === 0) {
+                container.innerHTML = '<div class="empty-tips">暂无错字记录</div>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            const today = getTodayDateStr();
+            const displayDates = showAllWrongDates ? wrongDates : wrongDates.slice(0, 5);
+
+            displayDates.forEach(date => {
+                const group = document.createElement('div');
+                group.className = 'date-group';
+
+                const isToday = (date === today);
+
+                const header = document.createElement('div');
+                header.className = 'date-header';
+                header.innerHTML = `<span>${date} ${isToday ? '(今天)' : ''}</span><span id="wrong-icon-${date}">${isToday ? '▲' : '▼'}</span>`;
+
+                const content = document.createElement('div');
+                content.className = `date-content ${isToday ? '' : 'collapsed'}`;
+                content.id = `wrong-content-${date}`;
+
+                header.onclick = () => {
+                    const isCollapsed = content.classList.toggle('collapsed');
+                    document.getElementById(`wrong-icon-${date}`).textContent = isCollapsed ? '▼' : '▲';
+                };
+
+                const charObj = historyData[date];
+                for (let char in charObj) {
+                    const m = charObj[char].wrong;
+                    if (m > 0) {
+                        const item = document.createElement('div');
+                        let classList = "wrong-book-item selectable-char";
+                        if (state.active) {
+                            classList += state.selectedChars.has(char) ? " selected" : " unselected";
+                        }
+                        item.className = classList;
+                        item.onclick = (e) => toggleCharSelection('wrong', char, e);
+
+                        item.innerHTML = `<span>${char}</span><span class="wrong-count-badge">${m}</span>`;
+                        content.appendChild(item);
+                    }
+                }
+
+                group.appendChild(header);
+                group.appendChild(content);
+                container.appendChild(group);
+            });
+
+            moreBtn.style.display = wrongDates.length > 5 && !showAllWrongDates ? 'block' : 'none';
+        }
+
+        function showAllWrongBook() {
+            showAllWrongDates = true;
+            renderStatisticsPage();
+        }
+
+        function renderStatChars(historyData) {
+            const container = document.getElementById('stat-char-container');
+            const moreBtn = document.getElementById('btn-stat-more');
+            const state = cardSelectionState.stat;
+            container.innerHTML = '';
+
+            let wrongCharMap = {};
+
+            for (let date in historyData) {
+                for (let char in historyData[date]) {
+                    const wrong = historyData[date][char].wrong;
+                    if (wrong > 0) {
+                        if (!wrongCharMap[char]) {
+                            wrongCharMap[char] = { totalWrong: 0, dates: [] };
+                        }
+                        wrongCharMap[char].totalWrong += wrong;
+                        wrongCharMap[char].dates.push(`${date} (${wrong}次)`);
+                    }
+                }
+            }
+
+            let sortedWrongList = Object.keys(wrongCharMap).map(char => {
+                return {
+                    char: char,
+                    totalWrong: wrongCharMap[char].totalWrong,
+                    dates: wrongCharMap[char].dates
+                };
+            }).sort((a, b) => b.totalWrong - a.totalWrong);
+
+            if (sortedWrongList.length === 0) {
+                container.innerHTML = '<div class="empty-tips">太棒了，目前没有错字统计！</div>';
+                moreBtn.style.display = 'none';
+                return;
+            }
+
+            const displayRows = showAllStatRows ? sortedWrongList : sortedWrongList.slice(0, 5);
+
+            displayRows.forEach((item, idx) => {
+                const rowItem = document.createElement('div');
+                let classList = "stat-row-item selectable-char";
+                if (state.active) {
+                    classList += state.selectedChars.has(item.char) ? " selected" : " unselected";
+                }
+                rowItem.className = classList;
+
+                const header = document.createElement('div');
+                header.className = 'stat-row-header';
+                header.innerHTML = `
+                    <div><span style="color:#999; margin-right:8px;">${idx + 1}</span><span class="stat-char-badge">${item.char}</span></div>
+                    <div style="font-size:0.85rem; color:#e53935; font-weight:bold;">错误 ${item.totalWrong} 次 <span style="font-size:0.75rem; color:#999;">▼</span></div>
+                `;
+
+                const detail = document.createElement('div');
+                detail.className = 'stat-detail-dates collapsed';
+                
+                let dateChips = item.dates.map(d => `<span class="date-chip">${d}</span>`).join('');
+                detail.innerHTML = `<div>错误发生日期：</div>${dateChips}`;
+
+                header.onclick = (e) => {
+                    if (state.active) {
+                        toggleCharSelection('stat', item.char, e);
+                    } else {
+                        detail.classList.toggle('collapsed');
+                    }
+                };
+
+                rowItem.appendChild(header);
+                rowItem.appendChild(detail);
+                container.appendChild(rowItem);
+            });
+
+            moreBtn.style.display = sortedWrongList.length > 5 && !showAllStatRows ? 'block' : 'none';
+        }
+
+        function showAllStatChars() {
+            showAllStatRows = true;
+            renderStatisticsPage();
+        }
+
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
 </body>
 </html>
